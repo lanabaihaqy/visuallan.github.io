@@ -3,382 +3,399 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vichiz Store</title>
+  <title>Vichiz Store — Akses Digital Premium</title>
+  <meta name="description" content="Vichiz Store menyediakan akses digital premium dengan alur beli ringkas, QRIS otomatis, dan detail order yang rapi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="bg-grid"></div>
+  <div class="site-shell">
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#home" class="brand">
+          <img src="pp.png" alt="Vichiz Store" class="brand-logo" />
+          <span class="brand-copy">
+            <strong>VICHIZ STORE</strong>
+            <small>akses digital premium</small>
+          </span>
+        </a>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="#home" class="brand">
-        <img src="pp.png" alt="Vichiz Store" class="brand-logo" />
-        <span>
-          <strong>VICHIZ STORE</strong>
-          <small>akses digital premium</small>
-        </span>
-      </a>
+        <nav class="main-nav">
+          <a href="#catalog">Produk</a>
+          <a href="#contact">Kontak</a>
+        </nav>
 
-      <nav class="main-nav">
-        <a href="#catalog">Produk</a>
-        <a href="#purchase">Checkout</a>
-        <a href="#contact">Kontak</a>
-      </nav>
+        <a href="#catalog" class="btn btn-primary">Mulai Belanja</a>
+      </div>
+    </header>
 
-      <a href="#catalog" class="btn btn-primary header-btn">Mulai Belanja</a>
-    </div>
-  </header>
-
-  <main>
-    <section class="hero" id="home">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <span class="eyebrow">QRIS otomatis • tanpa login • order detail langsung tampil</span>
-          <h1>Belanja akun digital lebih cepat, rapi, dan nyaman di mobile.</h1>
-          <p>
-            Vichiz Store menyediakan kebutuhan digital premium mulai dari akses AI, streaming,
-            voucher, hingga akun produktivitas dengan alur checkout singkat dan tampilan yang lebih bersih.
-          </p>
-
-          <div class="hero-actions">
-            <a href="#catalog" class="btn btn-primary">Lihat Produk</a>
-            <a href="#purchase" class="btn btn-secondary">Buka Checkout</a>
+    <main id="home">
+      <section class="hero section">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">VICHIZ STORE</span>
+            <h1>Akses digital premium yang rapi, cepat, dan enak dipakai.</h1>
+            <p>
+              Pilih produk, buka detail, isi nama + email + nomor hp, lalu lanjut ke QRIS.
+              Setelah pembayaran berhasil, detail akun langsung tampil dan bisa dicopy.
+            </p>
+            <div class="hero-actions">
+              <a href="#catalog" class="btn btn-primary">Lihat produk</a>
+              <button type="button" class="btn btn-secondary" id="heroOpenCheckout">Buka checkout</button>
+            </div>
           </div>
 
-          <div class="hero-points">
-            <article>
-              <strong>Tanpa akun</strong>
-              <span>Cukup nama, email, dan nomor hp.</span>
-            </article>
-            <article>
-              <strong>Auto QRIS</strong>
-              <span>Nominal dan status bayar tampil otomatis.</span>
-            </article>
-            <article>
-              <strong>Order detail</strong>
-              <span>Email dan password bisa langsung dicopy.</span>
-            </article>
-          </div>
-        </div>
-
-        <div class="hero-preview">
-          <article class="glass-card preview-main">
-            <div class="preview-head">
-              <span class="chip chip-green">Live preview</span>
-              <span class="soft-text">INV #VCH-2409</span>
+          <div class="hero-card card">
+            <div class="hero-card-head">
+              <span class="soft-pill">Kenapa enak dipakai</span>
             </div>
-            <h2>Checkout nyaman di HP</h2>
-            <p>Panel checkout kini bukan popup, jadi bisa discroll penuh dari atas ke bawah.</p>
-
-            <div class="mini-flow">
-              <div class="mini-item active"><span>1</span><div><strong>Pilih produk</strong><small>Buka detail item</small></div></div>
-              <div class="mini-item active"><span>2</span><div><strong>Isi data</strong><small>Nama, email, nomor hp</small></div></div>
-              <div class="mini-item"><span>3</span><div><strong>Bayar QRIS</strong><small>Status refresh otomatis</small></div></div>
-              <div class="mini-item"><span>4</span><div><strong>Order detail</strong><small>Email &amp; password siap copy</small></div></div>
-            </div>
-          </article>
-
-          <article class="glass-card preview-side">
-            <div class="status-line">
-              <div>
-                <small>Status</small>
-                <strong>Menunggu pembayaran</strong>
+            <div class="hero-points">
+              <div class="hero-point">
+                <span class="mini-icon">✓</span>
+                <div>
+                  <strong>Tanpa login</strong>
+                  <small>Cukup isi data singkat</small>
+                </div>
               </div>
-              <span class="chip">QRIS aktif</span>
-            </div>
-            <div class="status-line">
-              <div>
-                <small>Produk</small>
-                <strong>Netflix Premium • 1 profil</strong>
+              <div class="hero-point">
+                <span class="mini-icon">⚡</span>
+                <div>
+                  <strong>QRIS otomatis</strong>
+                  <small>Status pembayaran dicek berkala</small>
+                </div>
               </div>
-              <span>Rp 32.000</span>
+              <div class="hero-point">
+                <span class="mini-icon">⧉</span>
+                <div>
+                  <strong>Order detail rapi</strong>
+                  <small>Email dan password bisa dicopy</small>
+                </div>
+              </div>
             </div>
-            <div class="progress"><div class="progress-bar"></div></div>
-            <p class="soft-text">Desain dibuat lebih fresh, ringan, dan tidak meniru referensi visual yang Anda kirim.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section intro-band">
-      <div class="container intro-grid">
-        <article class="intro-copy">
-          <span class="section-kicker">Introduction</span>
-          <h2>Vichiz Store fokus ke alur belanja yang familiar, tapi tampil lebih modern dan enak dipakai.</h2>
-          <p>
-            Bagian pengenalan dipisah dari kartu info bawah supaya struktur halaman lebih rapi.
-            Section ini menjelaskan value utama, sedangkan bagian bawah khusus untuk informasi kepercayaan,
-            tautan cepat, dan kontak.
-          </p>
-        </article>
-        <article class="glass-card intro-highlight">
-          <div class="intro-badge">Fresh UI</div>
-          <h3>Siap disambungkan ke backend</h3>
-          <p>Checkout page, QRIS state, status bayar, dan detail akun tinggal dikaitkan ke endpoint order &amp; payment callback.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="section workflow" id="flow">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <span class="section-kicker">Cara kerja</span>
-            <h2>Empat langkah simpel dari pilih produk sampai akun diterima.</h2>
-          </div>
-          <p>Struktur tetap sederhana: pilih item, isi data, bayar QRIS, lalu lihat detail order secara langsung di halaman.</p>
-        </div>
-
-        <div class="workflow-grid">
-          <article class="glass-card flow-card"><span class="flow-number">01</span><h3>Pilih produk</h3><p>Buka detail item dari katalog dan lihat deskripsi, harga, jumlah terjual, serta S&amp;K.</p></article>
-          <article class="glass-card flow-card"><span class="flow-number">02</span><h3>Isi data pembeli</h3><p>Cukup tiga input saja supaya cepat diproses tanpa login dan tanpa registrasi.</p></article>
-          <article class="glass-card flow-card"><span class="flow-number">03</span><h3>Bayar via QRIS</h3><p>Nominal tampil otomatis, ada countdown, dan status pembayaran bisa dicek berkala.</p></article>
-          <article class="glass-card flow-card"><span class="flow-number">04</span><h3>Lihat order detail</h3><p>Setelah sukses, email dan password akun bisa langsung dilihat dan dicopy customer.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section catalog-section" id="catalog">
-      <div class="container">
-        <div class="section-head compact-head">
-          <div>
-            <span class="section-kicker">Katalog produk</span>
-            <h2>Pilih kategori dan buka detail produk.</h2>
-          </div>
-          <div class="meta-chips">
-            <span class="meta-chip"><strong>4.278+</strong><small>produk terjual</small></span>
-            <span class="meta-chip soft"><strong>Streaming</strong><small>AI • voucher • hiburan</small></span>
           </div>
         </div>
+      </section>
 
-        <div class="category-toolbar" id="categoryToolbar"></div>
-        <div class="catalog-layout">
+      <section class="catalog-section section" id="catalog">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Katalog produk</span>
+              <h2>Pilih kategori dan buka detail produk.</h2>
+            </div>
+            <p class="section-note">Klik <strong>Detail</strong> untuk lihat keterangan lengkap, atau <strong>Beli</strong> untuk langsung checkout.</p>
+          </div>
+
+          <div class="category-toolbar" id="categoryToolbar"></div>
           <div class="product-grid" id="productGrid"></div>
+        </div>
+      </section>
 
-          <aside class="glass-card detail-panel" id="detailPanel">
-            <span class="chip chip-green">Detail produk</span>
-            <div class="detail-icon-wrap">
-              <div class="detail-icon-bg"></div>
-              <div class="detail-icon" id="detailIcon">🎬</div>
-            </div>
-            <h3 id="detailName">Pilih produk dulu</h3>
-            <p id="detailDesc">Klik salah satu item di katalog untuk melihat detail lengkap di sini.</p>
+      <section class="benefits section">
+        <div class="container">
+          <div class="benefit-grid">
+            <article class="benefit-card card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5.25-3.438 9.938-7 11-3.562-1.062-7-5.75-7-11V6l7-3zm0 2.18L7 7.32V11c0 4.218 2.685 8.08 5 8.932 2.315-.852 5-4.714 5-8.932V7.32l-5-2.14zm2.47 4.35l1.06 1.06-4.24 4.24-2.12-2.12 1.06-1.06 1.06 1.06 3.18-3.18z"/></svg>
+              </div>
+              <div>
+                <h3>Aman &amp; Terpercaya</h3>
+                <p>Pembayaran dan informasi pembeli diproses dengan alur yang lebih tertata agar pengalaman order tetap nyaman.</p>
+              </div>
+            </article>
 
-            <div class="detail-stats">
-              <article><small>Harga</small><strong id="detailPrice">-</strong></article>
-              <article><small>Terjual</small><strong id="detailSold">-</strong></article>
+            <article class="benefit-card card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v5.17l3.24 1.86-.75 1.3L11.5 13V7h1.5z"/></svg>
+              </div>
+              <div>
+                <h3>Sistem Otomatis</h3>
+                <p>Begitu status bayar terbaca, sistem langsung lanjut ke tahap berikutnya tanpa perlu menunggu balasan manual.</p>
+              </div>
+            </article>
+
+            <article class="benefit-card card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H7l-3 3V4zm2 2v8.17L6.17 14H18V6H6zm3 2h6v1.5H9V8zm0 3h6v1.5H9V11z"/></svg>
+              </div>
+              <div>
+                <h3>Bantuan 24/7</h3>
+                <p>Kalau ada kendala saat order, channel resmi kami siap membantu kapan saja Anda butuhkan.</p>
+              </div>
+            </article>
+          </div>
+
+          <footer class="footer-card card" id="contact">
+            <div class="footer-brand">
+              <img src="pp.png" alt="Vichiz Store" class="footer-logo" />
+              <div>
+                <h3>VICHIZ STORE</h3>
+                <p>Pilihan akses digital, hiburan, dan lisensi software yang dikemas dengan proses order singkat, rapi, dan mudah dipahami dari awal sampai selesai.</p>
+              </div>
             </div>
 
-            <div class="detail-box">
-              <small>Keterangan produk</small>
-              <p id="detailInfo">-</p>
+            <div class="footer-links">
+              <div class="footer-title">
+                <span class="benefit-icon small">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v2H4V7zm0 4h16v2H4v-2zm0 4h10v2H4v-2z"/></svg>
+                </span>
+                <h4>Tautan Cepat</h4>
+              </div>
+              <a href="#catalog">Produk</a>
+              <a href="#">Syarat &amp; Ketentuan</a>
+              <a href="#">Kebijakan Privasi</a>
             </div>
 
-            <div class="detail-box">
-              <small>S&amp;K</small>
-              <p id="detailTerms">-</p>
-            </div>
+            <div class="footer-contact">
+              <div class="footer-title">
+                <span class="benefit-icon small">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 5.5l-9 8-9-8V5h18v.5zm0 2.67V19H3V8.17l9 8 9-8z"/></svg>
+                </span>
+                <h4>Hubungi Kami</h4>
+              </div>
 
-            <div class="detail-actions">
-              <button class="btn btn-primary" id="detailBuyBtn" type="button">Beli produk ini</button>
-              <button class="btn btn-secondary" id="detailCheckoutBtn" type="button">Ke checkout</button>
+              <a class="contact-row" href="https://t.me/vichizjourney" target="_blank" rel="noreferrer">
+                <img class="contact-brand-icon" src="https://cdn.simpleicons.org/telegram/229ED9" alt="Telegram" />
+                <span>
+                  <strong>Telegram Channel</strong>
+                  <small>@vichizjourney</small>
+                </span>
+              </a>
+
+              <a class="contact-row" href="https://wa.me/6285155273359" target="_blank" rel="noreferrer">
+                <img class="contact-brand-icon" src="https://cdn.simpleicons.org/whatsapp/25D366" alt="WhatsApp" />
+                <span>
+                  <strong>WhatsApp</strong>
+                  <small>085155273359</small>
+                </span>
+              </a>
+
+              <a class="contact-row" href="https://t.me/vichizstorecs_bot" target="_blank" rel="noreferrer">
+                <img class="contact-brand-icon" src="https://cdn.simpleicons.org/telegram/229ED9" alt="Telegram CS" />
+                <span>
+                  <strong>Telegram CS</strong>
+                  <small>@vichizstorecs_bot</small>
+                </span>
+              </a>
             </div>
-          </aside>
+          </footer>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <aside class="floating-telegram" id="telegramPopup" aria-label="Join Telegram">
+    <button type="button" class="floating-close" id="closeTelegramPopup" aria-label="Tutup">×</button>
+    <span class="floating-badge">Join Channel Telegram</span>
+    <h3>Dapatkan update &amp; notifikasi order lebih cepat.</h3>
+    <ul>
+      <li>Update produk baru &amp; promo</li>
+      <li>Notifikasi status order langsung</li>
+      <li>Support 24 jam via Telegram</li>
+      <li>Giveaway eksklusif untuk member</li>
+    </ul>
+    <a href="https://t.me/vichizjourney" target="_blank" rel="noreferrer" class="btn btn-primary btn-full">Join channel sekarang</a>
+  </aside>
+
+  <div class="modal" id="detailModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="detailModal"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="soft-pill">Detail produk</span>
+          <h3 id="detailName">Nama produk</h3>
+        </div>
+        <button type="button" class="modal-close" data-close-modal="detailModal" aria-label="Tutup">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-top">
+          <div class="brand-badge big" id="detailLogoWrap">
+            <img id="detailLogo" alt="" />
+            <span id="detailLogoFallback" class="logo-fallback"></span>
+          </div>
+
+          <div class="detail-summary">
+            <p id="detailDesc"></p>
+            <div class="detail-metrics">
+              <div>
+                <small>Harga</small>
+                <strong id="detailPrice">Rp 0</strong>
+              </div>
+              <div>
+                <small>Terjual</small>
+                <strong id="detailSold">0</strong>
+              </div>
+              <div>
+                <small>Stok</small>
+                <strong id="detailStock">0</strong>
+              </div>
+              <div>
+                <small>Kategori</small>
+                <strong id="detailCategory">-</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Keterangan produk</h4>
+          <p id="detailLongDesc"></p>
+        </div>
+
+        <div class="detail-section">
+          <h4>S&amp;K</h4>
+          <ul id="detailTerms"></ul>
         </div>
       </div>
-    </section>
 
-    <section class="section purchase-section" id="purchase">
-      <div class="container purchase-grid">
-        <aside class="glass-card purchase-sidebar">
-          <span class="chip chip-green">Checkout</span>
-          <h2 id="purchaseProductName">Netflix Premium • 1 profil</h2>
-          <p id="purchaseProductDesc">Pilih produk dari katalog, lalu isi data pembeli dan lanjut ke QRIS.</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal="detailModal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="detailBuyButton">Beli produk ini</button>
+      </div>
+    </div>
+  </div>
 
-          <div class="price-box">
+  <div class="modal" id="checkoutModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="checkoutModal"></div>
+    <div class="modal-dialog modal-dialog-wide">
+      <div class="modal-header">
+        <div>
+          <span class="soft-pill">Checkout</span>
+          <h3 id="checkoutProductTitle">Produk terpilih</h3>
+        </div>
+        <button type="button" class="modal-close" data-close-modal="checkoutModal" aria-label="Tutup">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="checkout-topbar">
+          <div class="checkout-price-card">
             <small>Total pembayaran</small>
-            <strong id="purchasePrice">Rp 32.000</strong>
+            <strong id="checkoutProductPrice">Rp 0</strong>
             <span>Biaya admin sudah termasuk</span>
           </div>
 
-          <div class="timeline">
-            <div class="timeline-item is-active" data-step="1"><span>1</span><div><strong>Data pembeli</strong><small>Isi data dasar</small></div></div>
-            <div class="timeline-item" data-step="2"><span>2</span><div><strong>QRIS pembayaran</strong><small>QR dan nominal muncul</small></div></div>
-            <div class="timeline-item" data-step="3"><span>3</span><div><strong>Pembayaran sukses</strong><small>Status berubah otomatis</small></div></div>
+          <div class="step-chips">
+            <button type="button" class="step-chip is-active" data-step-chip="1"><span>1</span>Data pembeli</button>
+            <button type="button" class="step-chip" data-step-chip="2"><span>2</span>QRIS pembayaran</button>
+            <button type="button" class="step-chip" data-step-chip="3"><span>3</span>Pembayaran sukses</button>
           </div>
-        </aside>
-
-        <div class="glass-card purchase-content">
-          <section class="checkout-step is-visible" data-step-panel="1">
-            <div class="section-minihead">
-              <span class="section-kicker">Langkah 1</span>
-              <h3>Isi data pembeli</h3>
-              <p>Tidak ada login. Halaman ini bisa discroll penuh di HP.</p>
-            </div>
-
-            <form id="checkoutForm" class="checkout-form">
-              <label><span>Nama lengkap</span><input type="text" name="name" placeholder="Contoh: Fajar Pratama" required /></label>
-              <label><span>Email</span><input type="email" name="email" placeholder="nama@email.com" required /></label>
-              <label><span>Nomor HP</span><input type="tel" name="phone" placeholder="08xxxxxxxxxx" required /></label>
-              <button class="btn btn-primary btn-block" type="submit">Lanjut ke pembayaran</button>
-            </form>
-          </section>
-
-          <section class="checkout-step" data-step-panel="2">
-            <div class="section-minihead">
-              <span class="section-kicker">Langkah 2</span>
-              <h3>Bayar melalui QRIS</h3>
-              <p>Simulasi UI: nanti tinggal dihubungkan ke gateway pembayaran real.</p>
-            </div>
-
-            <div class="payment-layout">
-              <div class="glass-sub qris-card">
-                <div class="qris-head">
-                  <strong>QRIS pembayaran</strong>
-                  <span class="chip">Auto generated</span>
-                </div>
-                <div class="qris-visual" aria-hidden="true"></div>
-                <div class="qris-foot">
-                  <div><small>Order ID</small><strong id="orderIdValue">VCH-000000</strong></div>
-                  <div><small>Total</small><strong id="amountValue">Rp 32.000</strong></div>
-                </div>
-              </div>
-
-              <div class="payment-side">
-                <div class="glass-sub status-card">
-                  <small>Status pembayaran</small>
-                  <strong id="paymentStatusText">Menunggu pembayaran</strong>
-                  <p id="paymentStatusNote">Sistem mengecek status secara otomatis tiap beberapa detik.</p>
-                  <div class="progress large"><div class="progress-bar" id="statusBarAnimated"></div></div>
-                </div>
-
-                <div class="payment-meta-grid">
-                  <article class="glass-sub"><small>Nama pembeli</small><strong id="buyerNameValue">-</strong></article>
-                  <article class="glass-sub"><small>Email</small><strong id="buyerEmailValue">-</strong></article>
-                  <article class="glass-sub"><small>No. HP</small><strong id="buyerPhoneValue">-</strong></article>
-                  <article class="glass-sub"><small>Batas waktu</small><strong id="countdownValue">14:59</strong></article>
-                </div>
-
-                <div class="inline-actions">
-                  <button class="btn btn-secondary" type="button" id="manualCheckBtn">Cek status</button>
-                  <button class="btn btn-ghost" type="button" id="markPaidBtn">Simulasikan berhasil</button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="checkout-step" data-step-panel="3">
-            <div class="success-state">
-              <div class="success-badge">✓</div>
-              <span class="section-kicker">Langkah 3</span>
-              <h3>Pembayaran berhasil</h3>
-              <p>Customer bisa langsung buka detail pesanan tanpa menunggu email masuk.</p>
-
-              <div class="success-summary">
-                <article><small>Order ID</small><strong id="successOrderId">VCH-000000</strong></article>
-                <article><small>Produk</small><strong id="successProductName">Netflix Premium • 1 profil</strong></article>
-                <article><small>Total</small><strong id="successAmount">Rp 32.000</strong></article>
-                <article><small>Status</small><strong class="text-success">Lunas</strong></article>
-              </div>
-
-              <div class="inline-actions centered">
-                <button class="btn btn-primary" type="button" id="showOrderDetailBtn">Lihat order detail</button>
-                <button class="btn btn-secondary" type="button" id="resetDemoBtn">Ulangi demo</button>
-              </div>
-            </div>
-
-            <div class="order-detail hidden" id="orderDetailBox">
-              <div class="order-detail-head">
-                <div>
-                  <small>Order detail</small>
-                  <h4>Data akun pesanan</h4>
-                </div>
-                <span class="chip chip-green">Siap dipakai</span>
-              </div>
-
-              <div class="order-detail-grid">
-                <article class="glass-sub"><small>Produk</small><strong id="orderDetailProduct">-</strong></article>
-                <article class="glass-sub"><small>Email pembeli</small><strong id="orderDetailBuyerEmail">-</strong></article>
-                <article class="glass-sub"><small>Metode bayar</small><strong>QRIS</strong></article>
-                <article class="glass-sub"><small>Status</small><strong class="text-success">Lunas</strong></article>
-              </div>
-
-              <div class="credential-grid">
-                <div class="glass-sub credential-box">
-                  <small>Email akun</small>
-                  <div class="copy-field">
-                    <strong id="credentialEmail">-</strong>
-                    <button type="button" class="copy-btn" data-copy-target="credentialEmail">Copy</button>
-                  </div>
-                </div>
-                <div class="glass-sub credential-box">
-                  <small>Password akun</small>
-                  <div class="copy-field">
-                    <strong id="credentialPassword">-</strong>
-                    <button type="button" class="copy-btn" data-copy-target="credentialPassword">Copy</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
         </div>
-      </div>
-    </section>
 
-    <section class="section info-footer-band">
-      <div class="container info-grid">
-        <article class="glass-card info-card">
-          <div class="info-icon blue">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l7 3v6c0 5-3.5 9.7-7 11-3.5-1.3-7-6-7-11V5l7-3zm0 5.2a3.3 3.3 0 100 6.6 3.3 3.3 0 000-6.6zm0 8.3c-2 0-3.9.8-5.2 2.1.9 1.3 2 2.5 3.2 3.3 1.2-.8 2.3-2 3.2-3.3-1.3-1.3-3.2-2.1-5.2-2.1z"/></svg>
-          </div>
-          <div><h3>Aman &amp; Terpercaya</h3><p>Semua transaksi dilindungi dan data pelanggan dijaga kerahasiaannya.</p></div>
-        </article>
-        <article class="glass-card info-card">
-          <div class="info-icon green">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 109 9h-2a7 7 0 11-2.05-4.95L15 9h6V3l-2.57 2.57A8.96 8.96 0 0012 3zm-1 5v5l4 2 .9-1.8-2.9-1.45V8H11z"/></svg>
-          </div>
-          <div><h3>Sistem Otomatis</h3><p>Tidak perlu menunggu admin, pesanan diproses oleh sistem segera setelah pembayaran.</p></div>
-        </article>
-        <article class="glass-card info-card">
-          <div class="info-icon purple">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 00-8 16l-1 4 4-1a10 10 0 105-19zm5 13.2c-.2.5-1.2.9-1.7 1-.4.1-.9.1-1.5-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4.1-4.7-4.3-.2-.2-1.1-1.4-1.1-2.7 0-1.3.7-1.9.9-2.2.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5.2.5.8 1.9.9 2 .1.1.1.3 0 .5-.1.2-.2.3-.4.5l-.5.5c-.2.2-.3.3-.1.6.2.3.8 1.4 1.7 2.2 1.2 1.1 2.1 1.4 2.5 1.6.3.1.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.3.7-.2.3.1 1.8.8 2.1 1 .3.1.5.2.6.3.1.2.1.9-.1 1.4z"/></svg>
-          </div>
-          <div><h3>Bantuan 24/7</h3><p>Tim support kami siap membantu kendala Anda kapanpun diperlukan.</p></div>
-        </article>
-        <article class="glass-card info-card wide">
-          <div class="info-icon soft-logo"><img src="pp.png" alt="Vichiz Store" /></div>
-          <div><h3>VICHIZ STORE</h3><p>Solusi kebutuhan digital premium. Mulai dari akses ChatGPT Team, akun hiburan, hingga lisensi software original dengan harga terjangkau.</p></div>
-        </article>
-        <article class="glass-card info-card" id="quicklinks">
-          <div class="info-icon blue">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 010-1.4l2.4-2.4a3 3 0 114.2 4.2l-1.8 1.8-1.4-1.4 1.8-1.8a1 1 0 10-1.4-1.4l-2.4 2.4a1 1 0 01-1.4 0zm2.8-2.8a1 1 0 010 1.4l-2.4 2.4a3 3 0 11-4.2-4.2l1.8-1.8 1.4 1.4-1.8 1.8a1 1 0 101.4 1.4l2.4-2.4a1 1 0 011.4 0z"/></svg>
-          </div>
-          <div><h3>Tautan Cepat</h3><p><a href="#catalog">Produk</a><br><a href="#">Syarat &amp; Ketentuan</a><br><a href="#">Kebijakan Privasi</a></p></div>
-        </article>
-        <article class="glass-card info-card" id="contact">
-          <div class="info-icon green">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2zm0 2v.5l8 5 8-5V7H4zm16 10V9.8l-7.5 4.7a1 1 0 01-1 0L4 9.8V17h16z"/></svg>
-          </div>
-          <div>
-            <h3>Hubungi Kami</h3>
-            <p>
-              Telegram channel: <strong>@vichizstore</strong><br>
-              WhatsApp: <strong>08xxxxxxxxxx</strong><br>
-              CS Telegram: <strong>@vichizstorecs_bot</strong>
-            </p>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
+        <section class="step-panel is-visible" data-step-panel="1">
+          <form id="checkoutForm" class="checkout-form">
+            <div class="form-grid">
+              <label>
+                <span>Nama lengkap</span>
+                <input type="text" name="name" placeholder="Contoh: Fajar Pratama" required />
+              </label>
+              <label>
+                <span>Email</span>
+                <input type="email" name="email" placeholder="nama@email.com" required />
+              </label>
+            </div>
 
-  <div class="telegram-toast" id="telegramToast">
-    <button class="toast-close" id="closeToastBtn" type="button">×</button>
-    <small>Join Channel Telegram!</small>
-    <h4>Dapatkan notifikasi real-time</h4>
-    <p>Update produk baru &amp; promo, notifikasi status order langsung, support 24 jam via Telegram, dan giveaway eksklusif untuk member.</p>
-    <a href="#contact" class="btn btn-primary btn-block">Join Channel Sekarang</a>
-    <span class="toast-note">Klik "Join" untuk dapatkan notifikasi terbaik!</span>
+            <label>
+              <span>Nomor hp</span>
+              <input type="tel" name="phone" placeholder="08xxxxxxxxxx" required />
+            </label>
+
+            <div class="checkout-actions">
+              <button type="submit" class="btn btn-primary">Lanjut ke QRIS</button>
+              <button type="button" class="btn btn-secondary" id="checkoutCloseBtn">Batal</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="step-panel" data-step-panel="2">
+          <div class="payment-grid">
+            <div class="payment-card">
+              <div class="qr-box" aria-hidden="true"></div>
+              <div class="payment-meta">
+                <div>
+                  <small>Order ID</small>
+                  <strong id="orderIdValue">VCH-000000</strong>
+                </div>
+                <div>
+                  <small>Nominal</small>
+                  <strong id="amountValue">Rp 0</strong>
+                </div>
+                <div>
+                  <small>Berlaku sampai</small>
+                  <strong id="countdownValue">15:00</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="payment-status-card">
+              <span class="status-badge pending" id="paymentStatusText">Menunggu pembayaran</span>
+              <p id="paymentStatusNote">Sistem cek otomatis</p>
+              <div class="status-bar"><div id="statusBarAnimated"></div></div>
+              <div class="checkout-actions">
+                <button type="button" class="btn btn-secondary" id="manualCheckBtn">Cek status</button>
+                <button type="button" class="btn btn-primary" id="markPaidBtn">Simulasikan berhasil</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="step-panel" data-step-panel="3">
+          <div class="success-card">
+            <div class="success-head">
+              <span class="status-badge success">Pembayaran berhasil</span>
+              <strong id="successOrderId">VCH-000000</strong>
+            </div>
+
+            <div class="success-summary">
+              <article>
+                <small>Produk</small>
+                <strong id="successProductName">-</strong>
+              </article>
+              <article>
+                <small>Total</small>
+                <strong id="successAmount">Rp 0</strong>
+              </article>
+            </div>
+
+            <div class="checkout-actions">
+              <button type="button" class="btn btn-primary" id="toggleOrderDetailBtn">Lihat order detail</button>
+              <button type="button" class="btn btn-secondary" id="resetDemoBtn">Buat order baru</button>
+            </div>
+
+            <div class="order-detail-card" id="orderDetailCard" hidden>
+              <div class="order-detail-grid">
+                <article>
+                  <small>Produk</small>
+                  <strong id="detailOrderProduct">-</strong>
+                </article>
+                <article>
+                  <small>Email pembeli</small>
+                  <strong id="detailBuyerEmail">-</strong>
+                </article>
+              </div>
+
+              <div class="credential-block">
+                <div>
+                  <small>Email akun</small>
+                  <strong id="accountEmailValue">-</strong>
+                </div>
+                <button type="button" class="copy-btn" data-copy-target="accountEmailValue">Copy</button>
+              </div>
+
+              <div class="credential-block">
+                <div>
+                  <small>Password akun</small>
+                  <strong id="accountPasswordValue">-</strong>
+                </div>
+                <button type="button" class="copy-btn" data-copy-target="accountPasswordValue">Copy</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
