@@ -1,9 +1,576 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Visuallan</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Holly Store - UI Concept</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Hello, this is my website 🔥</h1>
+  <div class="page-shell"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#home" class="brand">
+        <span class="brand-mark">H</span>
+        <span>
+          <strong>HOLLY STORE</strong>
+          <small>akses digital instan</small>
+        </span>
+      </a>
+
+      <nav class="main-nav">
+        <a href="#catalog">Katalog</a>
+        <a href="#flow">Cara Kerja</a>
+        <a href="#status">Status Pesanan</a>
+      </nav>
+
+      <a href="#catalog" class="header-cta">Mulai Belanja</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            Tanpa login • QRIS otomatis • status real-time
+          </div>
+          <h1>Checkout digital terasa lebih ringan, lebih cepat, dan lebih meyakinkan.</h1>
+          <p>
+            Konsep UI Holly Store dengan katalog produk digital, form pembeli sederhana,
+            QRIS auto-generate, detail order setelah pembayaran sukses, dan tampilan yang tetap fresh.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#catalog" class="btn btn-primary">Lihat katalog</a>
+            <a href="#purchase-demo" class="btn btn-secondary" id="previewCheckoutBtn">Preview checkout</a>
+          </div>
+
+          <div class="hero-metrics">
+            <article>
+              <strong>&lt; 2 menit</strong>
+              <span>alur checkout ringkas</span>
+            </article>
+            <article>
+              <strong>3 input</strong>
+              <span>nama, email, nomor hp</span>
+            </article>
+            <article>
+              <strong>Auto refresh</strong>
+              <span>status bayar terpantau live</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="hero-preview">
+          <div class="ambient-orb orb-a"></div>
+          <div class="ambient-orb orb-b"></div>
+
+          <article class="preview-card preview-card-main">
+            <div class="preview-topline">
+              <span class="status-pill status-live">Live checkout</span>
+              <span class="preview-id">INV #HLY-2409</span>
+            </div>
+            <h2>ChatGPT Team • 1 bulan</h2>
+            <p>Nomor pesanan, total pembayaran, status pembayaran, dan detail order tampil di satu alur.</p>
+
+            <div class="mini-steps">
+              <div class="mini-step is-active">
+                <span>1</span>
+                <div>
+                  <strong>Data pembeli</strong>
+                  <small>Nama, email, nomor hp</small>
+                </div>
+              </div>
+              <div class="mini-step is-active">
+                <span>2</span>
+                <div>
+                  <strong>QRIS otomatis</strong>
+                  <small>QR muncul setelah submit</small>
+                </div>
+              </div>
+              <div class="mini-step">
+                <span>3</span>
+                <div>
+                  <strong>Detail order</strong>
+                  <small>Email dan password siap dilihat</small>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="preview-card preview-card-side" id="status">
+            <div class="preview-card-heading">
+              <h3>Panel status pesanan</h3>
+              <span class="status-pill">Tersinkron</span>
+            </div>
+
+            <div class="status-item">
+              <div>
+                <small>Produk</small>
+                <strong>Canva Pro • 12 bulan</strong>
+              </div>
+              <span>Rp 85.000</span>
+            </div>
+            <div class="status-item">
+              <div>
+                <small>Pembayaran</small>
+                <strong>QRIS</strong>
+              </div>
+              <span class="text-emerald">Menunggu</span>
+            </div>
+            <div class="status-progress">
+              <div class="status-progress-bar"></div>
+            </div>
+            <p class="status-note">Setelah sukses, customer bisa langsung buka detail akun tanpa harus menunggu email masuk.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section trust-strip">
+      <div class="container trust-grid">
+        <article>
+          <span class="trust-icon">⚡</span>
+          <div>
+            <strong>Checkout tanpa akun</strong>
+            <p>Pembeli langsung isi data minimum yang benar-benar dibutuhkan.</p>
+          </div>
+        </article>
+        <article>
+          <span class="trust-icon">▣</span>
+          <div>
+            <strong>QRIS auto-generate</strong>
+            <p>Kode pembayaran muncul otomatis setelah order dibuat.</p>
+          </div>
+        </article>
+        <article>
+          <span class="trust-icon">◎</span>
+          <div>
+            <strong>Status real-time</strong>
+            <p>Halaman pembayaran bisa refresh berkala untuk cek sukses atau belum.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section workflow-section" id="flow">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Flow pembelian</span>
+            <h2>Struktur tetap familiar, tampilannya dibuat lebih segar.</h2>
+          </div>
+          <p>
+            Fokusnya bukan meniru gaya referensi, tapi mengambil logika belanjanya lalu dibungkus dengan visual yang lebih modern, ringan, dan kredibel.
+          </p>
+        </div>
+
+        <div class="workflow-grid">
+          <article class="flow-card">
+            <span class="flow-number">01</span>
+            <h3>Pilih produk</h3>
+            <p>Pengunjung bisa filter kategori, buka detail item, lalu lanjut checkout dari card atau panel detail.</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-number">02</span>
+            <h3>Isi data ringkas</h3>
+            <p>Cukup nama, email, dan nomor hp. Tidak ada registrasi, password, atau login.</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-number">03</span>
+            <h3>Bayar via QRIS</h3>
+            <p>Halaman khusus pembayaran menampilkan QR, nominal, countdown, dan status transaksi.</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-number">04</span>
+            <h3>Order detail tampil</h3>
+            <p>Setelah sukses, customer bisa membuka detail akun lengkap dengan area salin email dan password.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section catalog-section" id="catalog">
+      <div class="container">
+        <div class="section-head section-head-compact">
+          <div>
+            <span class="section-kicker">Katalog produk</span>
+            <h2>Pill kategori, card produk, dan panel detail yang terasa premium.</h2>
+          </div>
+          <div class="catalog-meta">
+            <div class="metric-chip">
+              <strong>4.278+</strong>
+              <span>transaksi selesai</span>
+            </div>
+            <div class="metric-chip soft">
+              <strong>Auto</strong>
+              <span>status checker</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-toolbar" id="categoryToolbar"></div>
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+    </section>
+
+    <section class="section feature-band">
+      <div class="container feature-band-grid">
+        <article>
+          <span>UI mood</span>
+          <h3>Fresh, soft, dan lebih premium</h3>
+          <p>Palet warna dibuat lebih bersih dengan permukaan terang, aksen mint-blue, dan bayangan halus.</p>
+        </article>
+        <article>
+          <span>UX mood</span>
+          <h3>Lebih enak dipindai di mobile</h3>
+          <p>Spacing longgar, hierarki jelas, tombol tegas, dan modal checkout yang fokus ke satu tugas.</p>
+        </article>
+        <article>
+          <span>Next step</span>
+          <h3>Siap dihubungkan ke backend</h3>
+          <p>State QRIS, detail akun, dan status bayar tinggal disambungkan ke endpoint order dan payment callback.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <article>
+        <h3>Aman &amp; Terpercaya</h3>
+        <p>Semua transaksi dilindungi dan data pelanggan dijaga kerahasiaannya.</p>
+      </article>
+      <article>
+        <h3>Sistem Otomatis</h3>
+        <p>Tidak perlu menunggu admin, pesanan diproses oleh sistem segera setelah pembayaran.</p>
+      </article>
+      <article>
+        <h3>Bantuan 24/7</h3>
+        <p>Tim support kami siap membantu kendala Anda kapanpun diperlukan.</p>
+      </article>
+      <article>
+        <h3>HOLLY STORE</h3>
+        <p>Solusi Kebutuhan Digital Premium. Mulai dari Akses ChatGPT Team, Akun Hiburan, hingga Lisensi Software Original dengan Harga Terjangkau.</p>
+      </article>
+      <article>
+        <h3>Tautan Cepat</h3>
+        <div class="footer-links">
+          <a href="#catalog">Produk</a>
+          <a href="#">Syarat &amp; Ketentuan</a>
+          <a href="#">Kebijakan Privasi</a>
+        </div>
+      </article>
+      <article>
+        <h3>Hubungi Kami</h3>
+        <div class="footer-links">
+          <a href="https://t.me/hollystoreCS_bot" target="_blank" rel="noreferrer">@hollystoreCS_bot</a>
+        </div>
+      </article>
+    </div>
+  </footer>
+
+  <div class="modal" id="purchaseModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-panel" id="purchase-demo">
+      <button class="modal-close" type="button" aria-label="Tutup" data-close-modal>×</button>
+
+      <div class="modal-sidebar">
+        <span class="status-pill status-live">Demo checkout</span>
+        <h2 id="modalProductName">ChatGPT Team • 1 bulan</h2>
+        <p id="modalProductDesc">Lisensi digital dengan pengiriman cepat setelah pembayaran tervalidasi.</p>
+
+        <div class="price-box">
+          <small>Total pembayaran</small>
+          <strong id="modalProductPrice">Rp 55.000</strong>
+          <span>Biaya admin sudah termasuk</span>
+        </div>
+
+        <div class="checkout-timeline">
+          <div class="timeline-item is-active" data-step="1">
+            <span>1</span>
+            <div>
+              <strong>Data pembeli</strong>
+              <small>Isi data dasar</small>
+            </div>
+          </div>
+          <div class="timeline-item" data-step="2">
+            <span>2</span>
+            <div>
+              <strong>QRIS pembayaran</strong>
+              <small>Nominal dan QR muncul</small>
+            </div>
+          </div>
+          <div class="timeline-item" data-step="3">
+            <span>3</span>
+            <div>
+              <strong>Pembayaran sukses</strong>
+              <small>Status berubah otomatis</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-content">
+        <section class="checkout-step is-visible" data-step-panel="1">
+          <div class="modal-section-head">
+            <span class="section-kicker">Langkah 1</span>
+            <h3>Isi data pembeli</h3>
+            <p>Hanya tiga input supaya proses tetap cepat. Tidak ada pembuatan akun.</p>
+          </div>
+
+          <form id="checkoutForm" class="checkout-form">
+            <label>
+              <span>Nama lengkap</span>
+              <input type="text" name="name" placeholder="Contoh: Fajar Pratama" required />
+            </label>
+            <label>
+              <span>Email</span>
+              <input type="email" name="email" placeholder="nama@email.com" required />
+            </label>
+            <label>
+              <span>Nomor HP</span>
+              <input type="tel" name="phone" placeholder="08xxxxxxxxxx" required />
+            </label>
+            <button class="btn btn-primary btn-block" type="submit">Lanjut ke QRIS</button>
+          </form>
+        </section>
+
+        <section class="checkout-step" data-step-panel="2">
+          <div class="modal-section-head">
+            <span class="section-kicker">Langkah 2</span>
+            <h3>Scan QRIS dan tunggu validasi</h3>
+            <p>Di versi live, area ini akan menampilkan QR dari gateway pembayaran serta polling status order.</p>
+          </div>
+
+          <div class="payment-layout">
+            <div class="qris-card">
+              <div class="qris-header">
+                <strong>QRIS pembayaran</strong>
+                <span class="status-pill">Auto generated</span>
+              </div>
+              <div class="qris-visual" id="qrisVisual" aria-hidden="true"></div>
+              <div class="qris-footer">
+                <div>
+                  <small>Order ID</small>
+                  <strong id="orderIdValue">HLY-000000</strong>
+                </div>
+                <div>
+                  <small>Total</small>
+                  <strong id="amountValue">Rp 55.000</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="payment-side">
+              <div class="status-card">
+                <small>Status pembayaran</small>
+                <strong id="paymentStatusText">Menunggu pembayaran</strong>
+                <p id="paymentStatusNote">Sistem mengecek status secara otomatis tiap beberapa detik.</p>
+                <div class="status-progress large">
+                  <div class="status-progress-bar" id="statusBarAnimated"></div>
+                </div>
+              </div>
+
+              <div class="payment-meta-grid">
+                <article>
+                  <small>Nama pembeli</small>
+                  <strong id="buyerNameValue">-</strong>
+                </article>
+                <article>
+                  <small>Email</small>
+                  <strong id="buyerEmailValue">-</strong>
+                </article>
+                <article>
+                  <small>No. HP</small>
+                  <strong id="buyerPhoneValue">-</strong>
+                </article>
+                <article>
+                  <small>Batas waktu</small>
+                  <strong id="countdownValue">14:59</strong>
+                </article>
+              </div>
+
+              <div class="inline-actions">
+                <button class="btn btn-secondary" type="button" id="manualCheckBtn">Cek status sekarang</button>
+                <button class="btn btn-ghost" type="button" id="markPaidBtn">Simulasikan berhasil</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="checkout-step" data-step-panel="3">
+          <div class="success-state">
+            <div class="success-badge">✓</div>
+            <span class="section-kicker">Langkah 3</span>
+            <h3>Pembayaran berhasil terdeteksi</h3>
+            <p>
+              Customer bisa langsung buka order detail untuk melihat data pesanan, email akun, dan password yang bisa langsung disalin.
+            </p>
+
+            <div class="success-summary">
+              <article>
+                <small>Order ID</small>
+                <strong id="successOrderId">HLY-000000</strong>
+              </article>
+              <article>
+                <small>Produk</small>
+                <strong id="successProductName">ChatGPT Team • 1 bulan</strong>
+              </article>
+              <article>
+                <small>Total</small>
+                <strong id="successAmount">Rp 55.000</strong>
+              </article>
+              <article>
+                <small>Status</small>
+                <strong class="text-emerald">Lunas</strong>
+              </article>
+            </div>
+
+            <button class="order-detail-toggle" type="button" id="toggleOrderDetailsBtn">
+              Lihat order detail
+            </button>
+
+            <div class="order-detail-panel" id="orderDetailPanel" hidden>
+              <div class="order-detail-grid">
+                <article>
+                  <small>Item dibeli</small>
+                  <strong id="detailProductName">ChatGPT Team • 1 bulan</strong>
+                </article>
+                <article>
+                  <small>Email pembeli</small>
+                  <strong id="detailBuyerEmail">-</strong>
+                </article>
+                <article>
+                  <small>Status order</small>
+                  <strong class="text-emerald">Siap digunakan</strong>
+                </article>
+                <article>
+                  <small>Metode bayar</small>
+                  <strong>QRIS</strong>
+                </article>
+              </div>
+
+              <div class="credential-box">
+                <div class="credential-head">
+                  <div>
+                    <small>Email akun</small>
+                    <strong id="credentialEmail">hollydemo@mail.com</strong>
+                  </div>
+                  <button class="copy-btn" type="button" data-copy-target="credentialEmail">Copy</button>
+                </div>
+              </div>
+
+              <div class="credential-box">
+                <div class="credential-head">
+                  <div>
+                    <small>Password akun</small>
+                    <strong id="credentialPassword">HollyDemo#2025</strong>
+                  </div>
+                  <button class="copy-btn" type="button" data-copy-target="credentialPassword">Copy</button>
+                </div>
+              </div>
+
+              <p class="order-detail-note">Detail ini bisa diposisikan sebagai popup lanjutan atau area bawah halaman sukses, supaya customer bisa langsung lihat tanpa harus buka email terlebih dulu.</p>
+            </div>
+
+            <div class="inline-actions centered">
+              <button class="btn btn-primary" type="button" id="resetDemoBtn">Ulangi demo</button>
+              <button class="btn btn-secondary" type="button" data-close-modal>Selesai</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer" id="productDetailDrawer" aria-hidden="true">
+    <div class="drawer-backdrop" data-close-drawer></div>
+    <aside class="drawer-panel">
+      <button class="drawer-close" type="button" aria-label="Tutup" data-close-drawer>×</button>
+      <span class="status-pill">Detail produk</span>
+      <h2 id="drawerProductName">ChatGPT Team • 1 bulan</h2>
+      <p id="drawerProductDesc">Deskripsi produk</p>
+
+      <div class="drawer-meta-grid">
+        <article>
+          <small>Kategori</small>
+          <strong id="drawerProductGroup">Akses AI</strong>
+        </article>
+        <article>
+          <small>Terjual</small>
+          <strong id="drawerProductSold">170+</strong>
+        </article>
+        <article>
+          <small>Harga</small>
+          <strong id="drawerProductPrice">Rp 55.000</strong>
+        </article>
+        <article>
+          <small>S&amp;K</small>
+          <strong id="drawerProductTerms">Bergaransi selama masa aktif dan wajib menjaga kerahasiaan akun.</strong>
+        </article>
+      </div>
+
+      <div class="drawer-actions">
+        <button class="btn btn-primary" type="button" id="drawerBuyBtn">Beli produk ini</button>
+        <button class="btn btn-secondary" type="button" data-close-drawer>Tutup</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="telegram-popup is-visible" id="telegramPopup">
+    <button class="telegram-popup-close" type="button" aria-label="Tutup" id="closeTelegramPopup">×</button>
+    <span class="section-kicker">Join Channel Telegram!</span>
+    <p>Dapatkan notifikasi real-time untuk:</p>
+    <ul>
+      <li>Update produk baru &amp; promo</li>
+      <li>Notifikasi status order langsung</li>
+      <li>Support 24 jam via Telegram</li>
+      <li>Giveaway eksklusif untuk member</li>
+    </ul>
+    <a class="btn btn-primary btn-block" href="https://t.me/hollystoreCS_bot" target="_blank" rel="noreferrer">Join Channel Sekarang</a>
+    <small>Klik "Join" untuk dapatkan notifikasi terbaik!</small>
+  </div>
+
+  <template id="productCardTemplate">
+    <article class="product-card">
+      <div class="product-card-top">
+        <span class="product-category-badge"></span>
+        <span class="product-stock-pill"></span>
+      </div>
+
+      <div class="product-visual">
+        <div class="product-visual-glow"></div>
+        <span class="product-visual-icon"></span>
+      </div>
+
+      <div class="product-card-body">
+        <span class="product-tag"></span>
+        <h3 class="product-name"></h3>
+        <p class="product-desc"></p>
+      </div>
+
+      <div class="product-card-meta">
+        <div>
+          <small>Terjual</small>
+          <strong class="product-sold"></strong>
+        </div>
+        <div>
+          <small>Harga</small>
+          <strong class="product-price-inline"></strong>
+        </div>
+      </div>
+
+      <div class="product-card-footer">
+        <button class="btn btn-secondary btn-detail" type="button">Lihat detail</button>
+        <button class="btn btn-primary btn-buy" type="button">Beli sekarang</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
 </body>
 </html>
