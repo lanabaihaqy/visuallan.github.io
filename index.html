@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
   <div class="site-shell">
@@ -22,12 +23,21 @@
           </span>
         </a>
 
-        <nav class="main-nav">
-          <a href="#catalog">Produk</a>
-          <a href="#contact">Kontak</a>
-        </nav>
+        <div class="header-actions">
+          <nav class="main-nav">
+            <a href="#contact">Kontak</a>
+          </nav>
 
-        <a href="#catalog" class="btn btn-primary">Mulai Belanja</a>
+          <a href="#catalog" class="btn btn-primary header-cta">Mulai Belanja</a>
+
+          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+            <svg class="theme-icon theme-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.25" stroke="currentColor" stroke-width="1.9"/>
+              <path d="M12 2.5v2.2M12 19.3v2.2M4.7 4.7l1.55 1.55M17.75 17.75l1.55 1.55M2.5 12h2.2M19.3 12h2.2M4.7 19.3l1.55-1.55M17.75 6.25l1.55-1.55" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+            <svg class="theme-icon theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.74 14.12A8.98 8.98 0 0110.1 3.36a.8.8 0 00-1-.97A10.2 10.2 0 1021.7 14.97a.8.8 0 00-.96-.85z"/></svg>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -38,12 +48,11 @@
             <span class="eyebrow">VICHIZ STORE</span>
             <h1>Akses digital premium yang rapi, cepat, dan enak dipakai.</h1>
             <p>
-              Pilih produk, buka detail, isi nama + email + nomor hp, lalu lanjut ke QRIS.
-              Setelah pembayaran berhasil, detail akun langsung tampil dan bisa dicopy.
+              Pilih produk, cek detailnya, isi data pembeli, lalu lanjutkan ke pembayaran QRIS.
+              Setelah transaksi terverifikasi, detail akun tampil lebih terstruktur dan gampang dicopy.
             </p>
             <div class="hero-actions">
               <a href="#catalog" class="btn btn-primary">Lihat produk</a>
-              <button type="button" class="btn btn-secondary" id="heroOpenCheckout">Buka checkout</button>
             </div>
           </div>
 
@@ -85,7 +94,7 @@
               <span class="eyebrow">Katalog produk</span>
               <h2>Pilih kategori dan buka detail produk.</h2>
             </div>
-            <p class="section-note">Klik <strong>Detail</strong> untuk lihat keterangan lengkap, atau <strong>Beli</strong> untuk langsung checkout.</p>
+            <p class="section-note">Tekan <strong>Detail</strong> untuk membaca keterangan produk, lalu lanjutkan ke tombol <strong>Beli</strong> jika sudah yakin.</p>
           </div>
 
           <div class="category-toolbar" id="categoryToolbar"></div>
@@ -102,7 +111,7 @@
               </div>
               <div>
                 <h3>Aman &amp; Terpercaya</h3>
-                <p>Pembayaran dan informasi pembeli diproses dengan alur yang lebih tertata agar pengalaman order tetap nyaman.</p>
+                <p>Transaksi dan data pembeli ditata dengan alur yang lebih jelas agar proses order tetap nyaman diikuti.</p>
               </div>
             </article>
 
@@ -112,7 +121,7 @@
               </div>
               <div>
                 <h3>Sistem Otomatis</h3>
-                <p>Begitu status bayar terbaca, sistem langsung lanjut ke tahap berikutnya tanpa perlu menunggu balasan manual.</p>
+                <p>Sesudah status pembayaran terbaca, proses akan lanjut ke tahap berikutnya tanpa menunggu pengecekan manual.</p>
               </div>
             </article>
 
@@ -122,7 +131,7 @@
               </div>
               <div>
                 <h3>Bantuan 24/7</h3>
-                <p>Kalau ada kendala saat order, channel resmi kami siap membantu kapan saja Anda butuhkan.</p>
+                <p>Kalau ada kendala saat order, channel resmi kami tetap siap membantu kapan pun dibutuhkan.</p>
               </div>
             </article>
           </div>
@@ -191,13 +200,17 @@
     <span class="floating-badge">Join Channel Telegram</span>
     <h3>Dapatkan update &amp; notifikasi order lebih cepat.</h3>
     <ul>
-      <li>Update produk baru &amp; promo</li>
-      <li>Notifikasi status order langsung</li>
-      <li>Support 24 jam via Telegram</li>
-      <li>Giveaway eksklusif untuk member</li>
+      <li>Info promo dan produk baru lebih cepat</li>
+      <li>Status order lebih mudah dipantau</li>
+      <li>Support Telegram siap dihubungi</li>
+      <li>Update spesial member akan dibagikan di sana</li>
     </ul>
     <a href="https://t.me/vichizjourney" target="_blank" rel="noreferrer" class="btn btn-primary btn-full">Join channel sekarang</a>
   </aside>
+
+  <button type="button" class="telegram-launcher" id="telegramLauncher" aria-label="Buka popup Telegram" hidden>
+    <img src="https://cdn.simpleicons.org/telegram/229ED9" alt="Telegram" />
+  </button>
 
   <div class="modal" id="detailModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-modal="detailModal"></div>
@@ -246,7 +259,7 @@
         </div>
 
         <div class="detail-section">
-          <h4>S&amp;K</h4>
+          <h4>Panduan singkat</h4>
           <ul id="detailTerms"></ul>
         </div>
       </div>
@@ -254,6 +267,35 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-close-modal="detailModal">Tutup</button>
         <button type="button" class="btn btn-primary" id="detailBuyButton">Beli produk ini</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="warningModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="warningModal"></div>
+    <div class="modal-dialog modal-dialog-alert">
+      <div class="modal-header warning-head">
+        <div>
+          <span class="warning-badge">Perhatian penting</span>
+          <h3>Baca keterangan produk sebelum lanjut</h3>
+        </div>
+        <button type="button" class="modal-close" data-close-modal="warningModal" aria-label="Tutup">×</button>
+      </div>
+      <div class="modal-body warning-body">
+        <div class="warning-icon">!</div>
+        <p class="warning-copy">Sebelum mengisi formulir pembelian, pastikan Anda sudah mengecek informasi produk, ketentuan penggunaan, dan detail paket yang dipilih.</p>
+        <div class="warning-card">
+          <h4>Kenapa bagian ini perlu dicek dulu?</h4>
+          <ul>
+            <li>Deskripsi membantu memastikan paket yang dipilih memang sesuai kebutuhan.</li>
+            <li>Ketentuan pemakaian memberi gambaran batas penggunaan dan masa aktif.</li>
+            <li>Catatan produk memudahkan Anda menghindari pembelian yang kurang cocok.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer warning-actions">
+        <button type="button" class="btn btn-primary" id="warningConfirmBtn">Ya, saya sudah membaca</button>
+        <button type="button" class="btn btn-secondary" data-close-modal="warningModal">Kembali</button>
       </div>
     </div>
   </div>
@@ -274,7 +316,7 @@
           <div class="checkout-price-card">
             <small>Total pembayaran</small>
             <strong id="checkoutProductPrice">Rp 0</strong>
-            <span>Biaya admin sudah termasuk</span>
+            <span>Nominal akhir akan menyesuaikan jumlah item yang dipilih.</span>
           </div>
 
           <div class="step-chips">
@@ -290,29 +332,96 @@
               <label>
                 <span>Nama lengkap</span>
                 <input type="text" name="name" placeholder="Contoh: Fajar Pratama" required />
+                <small>Nama ini dipakai untuk identitas invoice dan pelacakan order.</small>
               </label>
               <label>
-                <span>Email</span>
+                <span>Email pembeli</span>
                 <input type="email" name="email" placeholder="nama@email.com" required />
+                <small>Invoice dan notifikasi order dikirim ke email ini.</small>
               </label>
             </div>
 
-            <label>
-              <span>Nomor hp</span>
-              <input type="tel" name="phone" placeholder="08xxxxxxxxxx" required />
-            </label>
+            <div class="form-grid form-grid-qty">
+              <label>
+                <span>Nomor HP / WhatsApp</span>
+                <input type="tel" name="phone" placeholder="0812xxxxxxxx" required />
+                <small>Gunakan nomor aktif agar update pesanan lebih mudah diterima.</small>
+              </label>
+              <label>
+                <span>Jumlah item</span>
+                <div class="qty-control">
+                  <button type="button" class="qty-btn" id="decreaseQtyBtn" aria-label="Kurangi jumlah">−</button>
+                  <input type="number" name="qty" id="quantityInput" min="1" max="50" value="1" required />
+                  <button type="button" class="qty-btn" id="increaseQtyBtn" aria-label="Tambah jumlah">+</button>
+                </div>
+                <small id="quantityHelp">Maksimal 50 item per transaksi, selama stok masih tersedia.</small>
+              </label>
+            </div>
+
+            <div class="checkout-note card">
+              <div class="checkout-note-icon">i</div>
+              <p>Data pembeli dipakai untuk pengiriman invoice, pembaruan status order, dan keperluan komunikasi jika dibutuhkan.</p>
+            </div>
+
+            <div class="checkout-security-grid">
+              <div class="captcha-panel card">
+                <div class="panel-head">
+                  <span class="section-mini-icon">✓</span>
+                  <div>
+                    <strong>Verifikasi keamanan</strong>
+                    <small>Aktifkan Cloudflare Turnstile agar form lebih aman dari spam.</small>
+                  </div>
+                </div>
+                <div class="turnstile-slot" id="turnstileSlot"></div>
+              </div>
+
+              <div class="payment-summary card">
+                <div class="panel-head">
+                  <span class="section-mini-icon">≡</span>
+                  <div>
+                    <strong>Ringkasan pembayaran</strong>
+                    <small>Nominal akan menyesuaikan jumlah item yang dipilih.</small>
+                  </div>
+                </div>
+
+                <div class="summary-lines">
+                  <div><span>Harga per item</span><strong id="summaryUnitPrice">Rp 0</strong></div>
+                  <div><span>Jumlah item</span><strong id="summaryQty">1</strong></div>
+                  <div><span>Tipe produk</span><strong id="summaryType">ACCOUNT</strong></div>
+                </div>
+
+                <div class="summary-total">
+                  <span>Total pembayaran</span>
+                  <strong id="summaryTotal">Rp 0</strong>
+                </div>
+
+                <ul class="summary-footnotes">
+                  <li>Pembayaran diproses melalui QRIS dengan alur yang lebih ringkas.</li>
+                  <li>Invoice akan tetap tersimpan untuk memudahkan pengecekan pesanan.</li>
+                  <li>Jika ada kendala, Anda bisa lanjut ke channel bantuan resmi.</li>
+                </ul>
+              </div>
+            </div>
 
             <div class="checkout-actions">
-              <button type="submit" class="btn btn-primary">Lanjut ke QRIS</button>
-              <button type="button" class="btn btn-secondary" id="checkoutCloseBtn">Batal</button>
+              <button type="submit" class="btn btn-primary" id="continuePaymentBtn">Lanjut ke pembayaran</button>
+              <button type="button" class="btn btn-secondary" id="checkoutCloseBtn">Kembali ke produk</button>
             </div>
           </form>
         </section>
 
         <section class="step-panel" data-step-panel="2">
           <div class="payment-grid">
-            <div class="payment-card">
-              <div class="qr-box" aria-hidden="true"></div>
+            <div class="payment-card card">
+              <div class="qr-preview-wrap">
+                <img id="qrisImage" alt="QRIS Vichiz Store" class="qr-preview" />
+              </div>
+
+              <div class="qr-actions">
+                <button type="button" class="btn btn-secondary qr-action-btn" id="downloadQrBtn">Unduh QRIS</button>
+                <button type="button" class="btn btn-secondary qr-action-btn" id="zoomQrBtn">Zoom QRIS</button>
+              </div>
+
               <div class="payment-meta">
                 <div>
                   <small>Order ID</small>
@@ -324,28 +433,67 @@
                 </div>
                 <div>
                   <small>Berlaku sampai</small>
-                  <strong id="countdownValue">15:00</strong>
+                  <strong id="countdownValue">05:00</strong>
                 </div>
               </div>
             </div>
 
-            <div class="payment-status-card">
+            <div class="payment-status-card card" id="paymentLiveCard">
               <span class="status-badge pending" id="paymentStatusText">Menunggu pembayaran</span>
-              <p id="paymentStatusNote">Sistem cek otomatis</p>
+              <p id="paymentStatusNote">QRIS sedang aktif dan siap dipindai.</p>
               <div class="status-bar"><div id="statusBarAnimated"></div></div>
+              <div class="checkout-actions payment-buttons">
+                <button type="button" class="btn btn-secondary" id="manualCheckBtn">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6V3L8 7l4 4V8a4 4 0 11-4 4H6a6 6 0 106-6z"/></svg>
+                  Cek status
+                </button>
+                <button type="button" class="btn btn-secondary" id="backToStoreBtn">Kembali ke toko</button>
+              </div>
+
+              <div class="payment-info card subtle-panel">
+                <div class="panel-head compact">
+                  <span class="section-mini-icon">↯</span>
+                  <div>
+                    <strong>Alur pembayaran</strong>
+                    <small>Ikuti langkah singkat ini agar transaksi lebih mulus.</small>
+                  </div>
+                </div>
+                <div class="payment-steps-mini">
+                  <div><strong>1</strong><span>Pilih metode QRIS di aplikasi pembayaran Anda.</span></div>
+                  <div><strong>2</strong><span>Scan kode di atas dan pastikan nominalnya sesuai.</span></div>
+                  <div><strong>3</strong><span>Tekan cek status untuk memperbarui hasil pembayaran.</span></div>
+                </div>
+                <p class="payment-guidance">Gunakan aplikasi bank, e-wallet, atau dompet digital yang sudah mendukung QRIS untuk memindai kode di atas.</p>
+              </div>
+            </div>
+
+            <div class="payment-expired card" id="paymentExpiredCard" hidden>
+              <div class="expired-time">
+                <small>Batas waktu pembayaran</small>
+                <strong>00:00</strong>
+                <span id="expiredAmountValue">Rp 0</span>
+              </div>
+              <div class="expired-message">
+                <div class="expired-icon">⏰</div>
+                <h4>Waktu pembayaran sudah habis</h4>
+                <p>Invoice ini sudah melewati batas waktu aktif. Silakan buat pesanan baru untuk mendapatkan QRIS baru yang masih berlaku.</p>
+              </div>
               <div class="checkout-actions">
-                <button type="button" class="btn btn-secondary" id="manualCheckBtn">Cek status</button>
-                <button type="button" class="btn btn-primary" id="markPaidBtn">Simulasikan berhasil</button>
+                <button type="button" class="btn btn-primary" id="newOrderBtn">Buat pesanan baru</button>
+                <button type="button" class="btn btn-secondary" id="expiredBackBtn">Kembali ke toko</button>
               </div>
             </div>
           </div>
         </section>
 
         <section class="step-panel" data-step-panel="3">
-          <div class="success-card">
-            <div class="success-head">
-              <span class="status-badge success">Pembayaran berhasil</span>
-              <strong id="successOrderId">VCH-000000</strong>
+          <div class="success-card card">
+            <div class="success-head success-banner">
+              <div>
+                <span class="status-badge success">Pembayaran berhasil</span>
+                <strong id="successOrderId">VCH-000000</strong>
+              </div>
+              <p>Transaksi sudah dikonfirmasi. Detail order bisa dicek di bawah agar informasi akun lebih mudah dibaca.</p>
             </div>
 
             <div class="success-summary">
@@ -357,43 +505,75 @@
                 <small>Total</small>
                 <strong id="successAmount">Rp 0</strong>
               </article>
+              <article>
+                <small>Dikirim ke</small>
+                <strong id="successBuyerEmail">-</strong>
+              </article>
             </div>
 
             <div class="checkout-actions">
-              <button type="button" class="btn btn-primary" id="toggleOrderDetailBtn">Lihat order detail</button>
-              <button type="button" class="btn btn-secondary" id="resetDemoBtn">Buat order baru</button>
+              <button type="button" class="btn btn-primary" id="toggleOrderDetailBtn">Lihat detail order</button>
+              <button type="button" class="btn btn-secondary" id="resetDemoBtn">Kembali ke beranda</button>
             </div>
 
             <div class="order-detail-card" id="orderDetailCard" hidden>
-              <div class="order-detail-grid">
+              <div class="detail-alert card subtle-panel">
+                <strong>Catatan penting</strong>
+                <p>Periksa kembali data akun yang tampil di bawah. Bila ada kendala saat login, hubungi channel bantuan resmi dengan menyertakan nomor order Anda.</p>
+              </div>
+
+              <div class="order-detail-grid order-detail-grid-strong">
                 <article>
-                  <small>Produk</small>
-                  <strong id="detailOrderProduct">-</strong>
+                  <small>Order ID</small>
+                  <strong id="detailOrderId">-</strong>
                 </article>
                 <article>
-                  <small>Email pembeli</small>
-                  <strong id="detailBuyerEmail">-</strong>
+                  <small>Invoice</small>
+                  <strong id="detailInvoiceId">-</strong>
+                </article>
+                <article>
+                  <small>Jumlah item</small>
+                  <strong id="detailOrderQty">1</strong>
+                </article>
+                <article>
+                  <small>Total bayar</small>
+                  <strong id="detailOrderAmount">Rp 0</strong>
                 </article>
               </div>
 
-              <div class="credential-block">
+              <div class="order-detail-headline">
                 <div>
-                  <small>Email akun</small>
-                  <strong id="accountEmailValue">-</strong>
+                  <small>Detail akun / voucher</small>
+                  <strong>Informasi akun yang berhasil dikirim</strong>
                 </div>
-                <button type="button" class="copy-btn" data-copy-target="accountEmailValue">Copy</button>
+                <button type="button" class="copy-btn big" id="copyAllBtn">Copy all</button>
               </div>
 
-              <div class="credential-block">
-                <div>
-                  <small>Password akun</small>
-                  <strong id="accountPasswordValue">-</strong>
-                </div>
-                <button type="button" class="copy-btn" data-copy-target="accountPasswordValue">Copy</button>
+              <div class="credential-list" id="credentialList"></div>
+
+              <div class="shipping-note card subtle-panel">
+                <strong>Informasi pengiriman</strong>
+                <p>Salinan order tetap tersimpan di halaman ini. Setelah backend aktif, invoice dan status order juga dapat dikirim ke email pembeli secara otomatis.</p>
               </div>
             </div>
           </div>
         </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="qrZoomModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="qrZoomModal"></div>
+    <div class="modal-dialog modal-dialog-compact qr-zoom-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="soft-pill">QRIS</span>
+          <h3>Perbesar kode pembayaran</h3>
+        </div>
+        <button type="button" class="modal-close" data-close-modal="qrZoomModal" aria-label="Tutup">×</button>
+      </div>
+      <div class="modal-body qr-zoom-body">
+        <img id="qrisImageZoom" alt="QRIS perbesar" class="qr-zoom-image" />
       </div>
     </div>
   </div>

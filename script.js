@@ -499,18 +499,34 @@ const products = [
   }
 ];
 
+
 const categories = ['Semua', 'AI Premium', 'Streaming & Musik', 'Lisensi Software', 'VPN', 'Kopi', 'Voucher'];
+
+window.VICHIZ_TURNSTILE_SITEKEY = window.VICHIZ_TURNSTILE_SITEKEY || '';
 
 const state = {
   activeCategory: 'Semua',
   activeProduct: products[0],
+  pendingProductId: null,
   currentStep: 1,
-  orderId: 'VCH-000000',
-  countdown: 900,
+  orderId: 'ORD-VCHZ-000000',
+  invoiceId: 'INV-VCHZ-000000',
+  countdown: 300,
   countdownInterval: null,
-  paymentInterval: null,
-  paymentTick: 0,
-  autoPaidAfter: 3,
+  paymentChecks: 0,
+  checksUntilSuccess: 3,
+  checkoutExpired: false,
+  qrisDataUrl: '',
+  deliveredItems: [],
+  buyer: {
+    name: '',
+    email: '',
+    phone: '',
+    qty: 1,
+  },
+  turnstileWidgetId: null,
+  turnstileToken: '',
+  theme: localStorage.getItem('vichiz-theme') || 'light',
 };
 
 const categoryToolbar = document.getElementById('categoryToolbar');
@@ -518,12 +534,25 @@ const productGrid = document.getElementById('productGrid');
 const detailBuyButton = document.getElementById('detailBuyButton');
 const checkoutForm = document.getElementById('checkoutForm');
 const manualCheckBtn = document.getElementById('manualCheckBtn');
-const markPaidBtn = document.getElementById('markPaidBtn');
 const resetDemoBtn = document.getElementById('resetDemoBtn');
 const toggleOrderDetailBtn = document.getElementById('toggleOrderDetailBtn');
 const orderDetailCard = document.getElementById('orderDetailCard');
-const heroOpenCheckout = document.getElementById('heroOpenCheckout');
 const checkoutCloseBtn = document.getElementById('checkoutCloseBtn');
+const warningConfirmBtn = document.getElementById('warningConfirmBtn');
+const quantityInput = document.getElementById('quantityInput');
+const continuePaymentBtn = document.getElementById('continuePaymentBtn');
+const backToStoreBtn = document.getElementById('backToStoreBtn');
+const downloadQrBtn = document.getElementById('downloadQrBtn');
+const zoomQrBtn = document.getElementById('zoomQrBtn');
+const newOrderBtn = document.getElementById('newOrderBtn');
+const expiredBackBtn = document.getElementById('expiredBackBtn');
+const closeTelegramPopup = document.getElementById('closeTelegramPopup');
+const telegramPopup = document.getElementById('telegramPopup');
+const telegramLauncher = document.getElementById('telegramLauncher');
+const themeToggle = document.getElementById('themeToggle');
+const decreaseQtyBtn = document.getElementById('decreaseQtyBtn');
+const increaseQtyBtn = document.getElementById('increaseQtyBtn');
+const copyAllBtn = document.getElementById('copyAllBtn');
 
 function formatRupiah(value) {
   if (value == null) return 'By request';
@@ -535,7 +564,7 @@ function formatRupiah(value) {
 }
 
 function formatCountdown(totalSeconds) {
-  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const minutes = Math.floor(Math.max(0, totalSeconds) / 60).toString().padStart(2, '0');
   const seconds = Math.max(0, totalSeconds % 60).toString().padStart(2, '0');
   return `${minutes}:${seconds}`;
 }
@@ -596,6 +625,26 @@ function paintLogo(imgEl, fallbackEl, logo, fallbackText, altText) {
   }
 }
 
+function applyTheme(theme) {
+  state.theme = theme;
+  document.body.classList.toggle('dark-theme', theme === 'dark');
+  localStorage.setItem('vichiz-theme', theme);
+  themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Aktifkan tema terang' : 'Aktifkan tema gelap');
+}
+
+function toggleTheme() {
+  applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+}
+
+function patchProductStocks() {
+  const soldOutTargets = ['NordVPN • 1 tahun'];
+  products.forEach((product) => {
+    if (soldOutTargets.includes(product.name)) {
+      product.stock = 0;
+    }
+  });
+}
+
 function renderCategories() {
   categoryToolbar.innerHTML = '';
   categories.forEach((category) => {
@@ -620,12 +669,13 @@ function renderProducts() {
 
   filtered.forEach((product) => {
     const article = document.createElement('article');
-    article.className = 'product-card';
-    const buyLabel = product.action === 'chat' ? 'Chat admin' : 'Beli';
+    const isSoldOut = product.action !== 'chat' && product.stock <= 0;
+    const buyLabel = product.action === 'chat' ? 'Chat admin' : isSoldOut ? 'Stok habis' : 'Beli';
+    article.className = `product-card ${isSoldOut ? 'is-sold-out' : ''}`;
     article.innerHTML = `
       <div class="product-top">
         <span class="product-group-badge">${product.category}</span>
-        <span class="product-tag">${product.tag}</span>
+        <span class="product-tag ${isSoldOut ? 'is-muted' : ''}">${product.action === 'chat' ? product.tag : isSoldOut ? 'Stock habis' : product.tag}</span>
       </div>
       <div class="product-visual">
         <div class="brand-badge">
@@ -643,9 +693,9 @@ function renderProducts() {
           <small>Terjual</small>
           <strong>${product.sold}+</strong>
         </article>
-        <article>
-          <small>Stok</small>
-          <strong>${product.stock}</strong>
+        <article class="stock-metric ${isSoldOut ? 'is-empty' : ''}">
+          <small>${isSoldOut ? 'Status' : 'Stok'}</small>
+          <strong>${isSoldOut ? 'Stock habis' : product.stock}</strong>
         </article>
       </div>
       <div class="product-footer">
@@ -655,7 +705,7 @@ function renderProducts() {
         </div>
         <div class="product-footer-actions">
           <button type="button" class="btn btn-secondary btn-detail">Detail</button>
-          <button type="button" class="btn btn-primary btn-buy">${buyLabel}</button>
+          <button type="button" class="btn btn-primary btn-buy" ${isSoldOut ? 'disabled' : ''}>${buyLabel}</button>
         </div>
       </div>
     `;
@@ -670,11 +720,12 @@ function renderProducts() {
 }
 
 function renderDetail(product) {
+  const soldOut = product.action !== 'chat' && product.stock <= 0;
   document.getElementById('detailName').textContent = product.name;
   document.getElementById('detailDesc').textContent = product.shortDesc;
   document.getElementById('detailPrice').textContent = formatRupiah(product.price);
   document.getElementById('detailSold').textContent = `${product.sold}+ item`;
-  document.getElementById('detailStock').textContent = `${product.stock} tersedia`;
+  document.getElementById('detailStock').textContent = soldOut ? 'Stock habis' : `${product.stock} tersedia`;
   document.getElementById('detailCategory').textContent = product.category;
   document.getElementById('detailLongDesc').textContent = product.desc;
 
@@ -686,8 +737,16 @@ function renderDetail(product) {
     termsList.appendChild(li);
   });
 
-  const buyLabel = product.action === 'chat' ? 'Chat admin' : 'Beli produk ini';
-  detailBuyButton.textContent = buyLabel;
+  if (product.action === 'chat') {
+    detailBuyButton.textContent = 'Chat admin';
+    detailBuyButton.disabled = false;
+  } else if (soldOut) {
+    detailBuyButton.textContent = 'Stock habis';
+    detailBuyButton.disabled = true;
+  } else {
+    detailBuyButton.textContent = 'Beli produk ini';
+    detailBuyButton.disabled = false;
+  }
 
   paintLogo(
     document.getElementById('detailLogo'),
@@ -698,13 +757,45 @@ function renderDetail(product) {
   );
 }
 
+function updateQuantityLimit() {
+  if (!quantityInput) return;
+  const maxByStock = state.activeProduct?.action === 'chat'
+    ? 50
+    : Math.max(1, Math.min(50, state.activeProduct?.stock || 1));
+  quantityInput.max = String(maxByStock);
+  if (Number(quantityInput.value) > maxByStock) {
+    quantityInput.value = String(maxByStock);
+  }
+  if (Number(quantityInput.value) < 1) {
+    quantityInput.value = '1';
+  }
+  document.getElementById('quantityHelp').textContent = state.activeProduct?.action === 'chat'
+    ? 'Jumlah bisa dipakai untuk kebutuhan awal, lalu admin akan menyesuaikan detail bulk order.'
+    : `Maksimal ${maxByStock} item per transaksi, menyesuaikan stok yang tersedia saat ini.`;
+}
+
 function syncProductToCheckout(product) {
   document.getElementById('checkoutProductTitle').textContent = product.name;
-  document.getElementById('checkoutProductPrice').textContent = formatRupiah(product.price);
-  document.getElementById('amountValue').textContent = formatRupiah(product.price);
   document.getElementById('successProductName').textContent = product.name;
-  document.getElementById('successAmount').textContent = formatRupiah(product.price);
-  document.getElementById('detailOrderProduct').textContent = product.name;
+  document.getElementById('summaryType').textContent = product.category === 'Voucher' ? 'VOUCHER' : 'ACCOUNT';
+  updateQuantityLimit();
+  updateCheckoutSummary();
+}
+
+function updateCheckoutSummary() {
+  const product = state.activeProduct;
+  const qty = Number(quantityInput?.value || 1);
+  state.buyer.qty = qty;
+  const total = product.price == null ? null : product.price * qty;
+
+  document.getElementById('checkoutProductPrice').textContent = formatRupiah(total ?? product.price);
+  document.getElementById('summaryUnitPrice').textContent = formatRupiah(product.price);
+  document.getElementById('summaryQty').textContent = String(qty);
+  document.getElementById('summaryTotal').textContent = formatRupiah(total ?? product.price);
+  document.getElementById('amountValue').textContent = formatRupiah(total ?? product.price);
+  document.getElementById('successAmount').textContent = formatRupiah(total ?? product.price);
+  document.getElementById('detailOrderAmount').textContent = formatRupiah(total ?? product.price);
+  document.getElementById('detailOrderQty').textContent = String(qty);
 }
 
 function selectProduct(productId) {
@@ -720,63 +811,192 @@ function openDetail(productId) {
   openModal('detailModal');
 }
 
+function openWarning(productId) {
+  selectProduct(productId);
+  state.pendingProductId = productId;
+  openModal('warningModal');
+}
+
 function openCheckout(productId = state.activeProduct.id) {
   selectProduct(productId);
   resetCheckoutState(false);
   openModal('checkoutModal');
+  renderTurnstile();
 }
 
 function handleBuy(productId) {
   const product = products.find((item) => item.id === productId);
   if (!product) return;
-  selectProduct(productId);
   if (product.action === 'chat') {
     window.open('https://t.me/vichizstorecs_bot', '_blank', 'noopener,noreferrer');
     return;
   }
+  if (product.stock <= 0) return;
   closeModal('detailModal');
-  openCheckout(productId);
+  openWarning(productId);
 }
 
-function generateOrderId() {
-  const random = Math.floor(100000 + Math.random() * 900000);
-  return `VCH-${random}`;
+function generateOrderIds() {
+  const stamp = Date.now().toString().slice(-6);
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return {
+    orderId: `VCH-${stamp}${rand}`,
+    invoiceId: `INV-${new Date().getFullYear()}${stamp}${rand}`,
+  };
+}
+
+function generateFakeQR(text, size = 420) {
+  const cells = 21;
+  const cell = Math.floor(size / cells);
+  const quiet = 4;
+  const hash = Array.from(text).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+
+  function isFinder(x, y) {
+    const spots = [
+      [0, 0],
+      [cells - 7, 0],
+      [0, cells - 7],
+    ];
+    return spots.some(([fx, fy]) => x >= fx && x < fx + 7 && y >= fy && y < fy + 7);
+  }
+
+  function finderFill(x, y) {
+    const lx = x % 7;
+    const ly = y % 7;
+    const outer = lx === 0 || lx === 6 || ly === 0 || ly === 6;
+    const inner = lx >= 2 && lx <= 4 && ly >= 2 && ly <= 4;
+    return outer || inner;
+  }
+
+  let rects = '';
+  for (let y = 0; y < cells; y += 1) {
+    for (let x = 0; x < cells; x += 1) {
+      let fill = false;
+      if (isFinder(x, y)) {
+        fill = finderFill(x, y);
+      } else {
+        fill = ((x * 7 + y * 13 + hash) % 3) === 0 || ((x + y + hash) % 11) === 0;
+      }
+      if (fill) {
+        rects += `<rect x="${(x + quiet) * cell}" y="${(y + quiet) * cell}" width="${cell}" height="${cell}" rx="1" />`;
+      }
+    }
+  }
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${(cells + quiet * 2) * cell} ${(cells + quiet * 2) * cell}"><rect width="100%" height="100%" fill="#fff" rx="28"/><g fill="#111a2f">${rects}</g></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function buildDummyAccounts() {
+  const qty = Number(quantityInput.value || 1);
+  const base = slugify(state.activeProduct.brand || state.activeProduct.name).slice(0, 10) || 'akun';
+  return Array.from({ length: qty }, (_, index) => {
+    const no = String(index + 1).padStart(2, '0');
+    return {
+      label: `Item ${no}`,
+      email: `${base}${no}@vichiz-order.com`,
+      password: `VCZ-${state.orderId.slice(-4)}-${no}`,
+      note: 'Simpan data ini dan hindari membagikannya ke pihak lain tanpa kebutuhan yang jelas.',
+    };
+  });
 }
 
 function populateBuyer(formData) {
-  document.getElementById('detailBuyerEmail').textContent = formData.email;
+  state.buyer = {
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone,
+    qty: Number(formData.qty || 1),
+  };
+  document.getElementById('successBuyerEmail').textContent = formData.email;
 }
 
-function buildAccountData() {
-  const slug = slugify(state.activeProduct.brand || state.activeProduct.name).slice(0, 14);
-  document.getElementById('accountEmailValue').textContent = `${slug}@vichiz-order.com`;
-  document.getElementById('accountPasswordValue').textContent = `VCZ-${state.orderId.slice(-4)}-${String(state.activeProduct.id).padStart(2, '0')}`;
+function renderCredentialList() {
+  const list = document.getElementById('credentialList');
+  list.innerHTML = '';
+  state.deliveredItems.forEach((item, index) => {
+    const card = document.createElement('article');
+    card.className = 'credential-item card';
+    card.innerHTML = `
+      <div class="credential-item-head">
+        <div>
+          <small>${item.label}</small>
+          <strong>${state.activeProduct.name}</strong>
+        </div>
+        <button type="button" class="copy-btn" data-copy-credential="${index}">Copy data</button>
+      </div>
+      <div class="credential-field">
+        <span>Email akun</span>
+        <strong>${item.email}</strong>
+      </div>
+      <div class="credential-field">
+        <span>Password akun</span>
+        <strong>${item.password}</strong>
+      </div>
+      <p class="credential-note">${item.note}</p>
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('[data-copy-credential]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const item = state.deliveredItems[Number(button.dataset.copyCredential)];
+      if (!item) return;
+      try {
+        await navigator.clipboard.writeText(`Email: ${item.email}\nPassword: ${item.password}`);
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = 'Copy data'; }, 1200);
+      } catch {
+        button.textContent = 'Gagal';
+        setTimeout(() => { button.textContent = 'Copy data'; }, 1200);
+      }
+    });
+  });
 }
 
-function updatePaymentStatus(text, tone = 'pending', note = 'Sistem cek otomatis') {
+function updatePaymentStatus(text, tone = 'pending', note = 'QRIS sedang aktif dan siap dipindai.') {
   const badge = document.getElementById('paymentStatusText');
   badge.textContent = text;
   badge.className = `status-badge ${tone}`;
   document.getElementById('paymentStatusNote').textContent = note;
 }
 
+function updateStatusProgress() {
+  const progress = document.getElementById('statusBarAnimated');
+  const percent = Math.min(100, (state.paymentChecks / state.checksUntilSuccess) * 100);
+  progress.style.width = `${Math.max(percent, 16)}%`;
+}
+
 function clearIntervals() {
   if (state.countdownInterval) clearInterval(state.countdownInterval);
-  if (state.paymentInterval) clearInterval(state.paymentInterval);
   state.countdownInterval = null;
-  state.paymentInterval = null;
+}
+
+function showPaymentLive() {
+  document.getElementById('paymentLiveCard').hidden = false;
+  document.getElementById('paymentExpiredCard').hidden = true;
+}
+
+function showPaymentExpired() {
+  state.checkoutExpired = true;
+  clearIntervals();
+  updatePaymentStatus('Waktu habis', 'danger', 'Invoice ini sudah tidak aktif. Buat pesanan baru untuk melanjutkan.');
+  document.getElementById('paymentLiveCard').hidden = true;
+  document.getElementById('paymentExpiredCard').hidden = false;
+  document.getElementById('expiredAmountValue').textContent = document.getElementById('amountValue').textContent;
 }
 
 function startCountdown() {
-  clearInterval(state.countdownInterval);
-  state.countdown = 15 * 60;
+  clearIntervals();
+  state.countdown = 5 * 60;
+  state.checkoutExpired = false;
+  showPaymentLive();
   document.getElementById('countdownValue').textContent = formatCountdown(state.countdown);
   state.countdownInterval = setInterval(() => {
     state.countdown -= 1;
     document.getElementById('countdownValue').textContent = formatCountdown(state.countdown);
     if (state.countdown <= 0) {
-      clearInterval(state.countdownInterval);
-      updatePaymentStatus('Waktu habis', 'pending', 'Buat order ulang jika pembayaran belum masuk');
+      showPaymentExpired();
     }
   }, 1000);
 }
@@ -784,101 +1004,186 @@ function startCountdown() {
 function showSuccessState() {
   clearIntervals();
   setStep(3);
-  updatePaymentStatus('Pembayaran berhasil', 'success', 'Order siap ditampilkan');
-  const progress = document.getElementById('statusBarAnimated');
-  progress.style.animation = 'none';
-  progress.style.width = '100%';
-  progress.style.background = 'linear-gradient(90deg, #19a974, #59c7c7)';
+  updatePaymentStatus('Pembayaran berhasil', 'success', 'Status terakhir sudah berhasil diverifikasi.');
   document.getElementById('successOrderId').textContent = state.orderId;
-  buildAccountData();
-}
-
-function startPaymentPolling() {
-  clearInterval(state.paymentInterval);
-  state.paymentTick = 0;
-  state.autoPaidAfter = 3 + Math.floor(Math.random() * 2);
-  updatePaymentStatus('Menunggu pembayaran', 'pending', 'QR aktif dan status akan dicek berkala');
-  state.paymentInterval = setInterval(() => {
-    state.paymentTick += 1;
-    if (state.paymentTick < state.autoPaidAfter) {
-      updatePaymentStatus('Menunggu konfirmasi', 'pending', `Pengecekan otomatis ke-${state.paymentTick}`);
-      return;
-    }
-    showSuccessState();
-  }, 4000);
+  document.getElementById('detailOrderId').textContent = state.orderId;
+  document.getElementById('detailInvoiceId').textContent = state.invoiceId;
+  document.getElementById('detailOrderQty').textContent = String(state.buyer.qty || 1);
+  document.getElementById('detailOrderAmount').textContent = document.getElementById('amountValue').textContent;
+  state.deliveredItems = buildDummyAccounts();
+  renderCredentialList();
 }
 
 function resetCheckoutState(resetForm = true) {
   clearIntervals();
   setStep(1);
-  state.orderId = 'VCH-000000';
-  updatePaymentStatus('Menunggu pembayaran', 'pending', 'Sistem cek otomatis');
-  document.getElementById('orderIdValue').textContent = 'VCH-000000';
-  document.getElementById('successOrderId').textContent = 'VCH-000000';
-  document.getElementById('countdownValue').textContent = '15:00';
-  const progress = document.getElementById('statusBarAnimated');
-  progress.style.animation = '';
-  progress.style.width = '';
-  progress.style.background = '';
+  state.paymentChecks = 0;
+  state.checksUntilSuccess = 2 + Math.floor(Math.random() * 2);
+  state.checkoutExpired = false;
+  state.turnstileToken = '';
+  const ids = generateOrderIds();
+  state.orderId = ids.orderId;
+  state.invoiceId = ids.invoiceId;
+  state.qrisDataUrl = '';
+  document.getElementById('orderIdValue').textContent = state.orderId;
+  document.getElementById('successOrderId').textContent = state.orderId;
+  document.getElementById('detailOrderId').textContent = state.orderId;
+  document.getElementById('detailInvoiceId').textContent = state.invoiceId;
+  document.getElementById('countdownValue').textContent = '05:00';
+  updatePaymentStatus('Menunggu pembayaran', 'pending', 'QRIS sedang aktif dan siap dipindai.');
+  document.getElementById('statusBarAnimated').style.width = '16%';
+  showPaymentLive();
   orderDetailCard.hidden = true;
-  toggleOrderDetailBtn.textContent = 'Lihat order detail';
+  toggleOrderDetailBtn.textContent = 'Lihat detail order';
   if (resetForm) checkoutForm.reset();
+  quantityInput.value = quantityInput.value || '1';
+  updateQuantityLimit();
+  updateCheckoutSummary();
+  renderTurnstile();
+}
+
+function buildPaymentArtifacts() {
+  state.qrisDataUrl = generateFakeQR(`${state.orderId}|${document.getElementById('amountValue').textContent}`);
+  document.getElementById('qrisImage').src = state.qrisDataUrl;
+  document.getElementById('qrisImageZoom').src = state.qrisDataUrl;
+}
+
+function openTelegramCard() {
+  telegramPopup.style.display = 'block';
+  telegramPopup.classList.add('is-open');
+  document.body.classList.add('telegram-popup-open');
+  telegramLauncher.hidden = true;
+}
+
+function closeTelegramCard() {
+  telegramPopup.style.display = 'none';
+  telegramPopup.classList.remove('is-open');
+  document.body.classList.remove('telegram-popup-open');
+  telegramLauncher.hidden = false;
+}
+
+function renderTurnstilePlaceholder(message, tone = 'neutral') {
+  const slot = document.getElementById('turnstileSlot');
+  slot.innerHTML = `<div class="turnstile-placeholder ${tone}">${message}</div>`;
+}
+
+function renderTurnstile() {
+  const sitekey = window.VICHIZ_TURNSTILE_SITEKEY || '';
+  const slot = document.getElementById('turnstileSlot');
+  if (!slot) return;
+
+  if (!sitekey) {
+    renderTurnstilePlaceholder('Cloudflare Turnstile siap dipasang. Masukkan sitekey Anda agar verifikasi aktif di form checkout.', 'neutral');
+    return;
+  }
+
+  if (!window.turnstile) {
+    renderTurnstilePlaceholder('Memuat Cloudflare Turnstile...', 'neutral');
+    return;
+  }
+
+  slot.innerHTML = '<div id="turnstileWidget"></div>';
+  state.turnstileWidgetId = window.turnstile.render('#turnstileWidget', {
+    sitekey,
+    callback(token) {
+      state.turnstileToken = token;
+    },
+    'expired-callback'() {
+      state.turnstileToken = '';
+    },
+  });
+}
+
+function maybeRequireTurnstile() {
+  const sitekey = window.VICHIZ_TURNSTILE_SITEKEY || '';
+  if (!sitekey) return true;
+  if (state.turnstileToken) return true;
+  renderTurnstilePlaceholder('Selesaikan verifikasi keamanan terlebih dahulu sebelum lanjut ke pembayaran.', 'warning');
+  return false;
+}
+
+function prepareCheckout(formData) {
+  populateBuyer(formData);
+  const ids = generateOrderIds();
+  state.orderId = ids.orderId;
+  state.invoiceId = ids.invoiceId;
+  document.getElementById('orderIdValue').textContent = state.orderId;
+  document.getElementById('successOrderId').textContent = state.orderId;
+  document.getElementById('detailOrderId').textContent = state.orderId;
+  document.getElementById('detailInvoiceId').textContent = state.invoiceId;
+  document.getElementById('successBuyerEmail').textContent = formData.email;
+  buildPaymentArtifacts();
+  setStep(2);
+  startCountdown();
+  updatePaymentStatus('Menunggu pembayaran', 'pending', 'Silakan scan QRIS lalu gunakan tombol cek status untuk memperbarui hasilnya.');
+}
+
+function simulateProcessingSubmit(formData) {
+  const originalText = continuePaymentBtn.textContent;
+  continuePaymentBtn.disabled = true;
+  continuePaymentBtn.textContent = 'Memproses...';
+  setTimeout(() => {
+    continuePaymentBtn.disabled = false;
+    continuePaymentBtn.textContent = originalText;
+    prepareCheckout(formData);
+  }, 1400);
+}
+
+function resetToCatalog() {
+  closeModal('checkoutModal');
+  closeModal('warningModal');
+  closeModal('detailModal');
+  closeModal('qrZoomModal');
+  resetCheckoutState(true);
 }
 
 checkoutForm.addEventListener('submit', (event) => {
   event.preventDefault();
+  if (!maybeRequireTurnstile()) return;
   const formData = Object.fromEntries(new FormData(checkoutForm));
-  state.orderId = generateOrderId();
-  document.getElementById('orderIdValue').textContent = state.orderId;
-  document.getElementById('successOrderId').textContent = state.orderId;
-  populateBuyer(formData);
-  setStep(2);
-  startCountdown();
-  startPaymentPolling();
+  simulateProcessingSubmit(formData);
 });
 
 manualCheckBtn.addEventListener('click', () => {
-  if (state.currentStep !== 2) return;
-  state.paymentTick += 1;
-  if (state.paymentTick >= state.autoPaidAfter) {
-    showSuccessState();
-  } else {
-    updatePaymentStatus('Masih pending', 'pending', `Belum ada pembayaran masuk. Cek berikutnya ke-${state.paymentTick}`);
-  }
+  if (state.currentStep !== 2 || state.checkoutExpired) return;
+  state.paymentChecks += 1;
+  updateStatusProgress();
+  const checkedAt = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  updatePaymentStatus('Menunggu konfirmasi', 'pending', `Status terakhir diperbarui pukul ${checkedAt}. Belum ada pembayaran yang terverifikasi pada invoice ini.`);
 });
 
-markPaidBtn.addEventListener('click', showSuccessState);
-
 resetDemoBtn.addEventListener('click', () => {
+  closeModal('checkoutModal');
   resetCheckoutState(true);
-  setStep(1);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 detailBuyButton.addEventListener('click', () => handleBuy(state.activeProduct.id));
 
+warningConfirmBtn.addEventListener('click', () => {
+  closeModal('warningModal');
+  if (state.pendingProductId != null) {
+    openCheckout(state.pendingProductId);
+  }
+});
+
 toggleOrderDetailBtn.addEventListener('click', () => {
   const isHidden = orderDetailCard.hidden;
   orderDetailCard.hidden = !isHidden ? true : false;
-  toggleOrderDetailBtn.textContent = isHidden ? 'Sembunyikan order detail' : 'Lihat order detail';
+  toggleOrderDetailBtn.textContent = isHidden ? 'Sembunyikan detail order' : 'Lihat detail order';
 });
 
-document.querySelectorAll('[data-copy-target]').forEach((button) => {
-  button.addEventListener('click', async () => {
-    const target = document.getElementById(button.dataset.copyTarget);
-    if (!target) return;
-    try {
-      await navigator.clipboard.writeText(target.textContent.trim());
-      button.textContent = 'Copied';
-      button.classList.add('is-copied');
-      setTimeout(() => {
-        button.textContent = 'Copy';
-        button.classList.remove('is-copied');
-      }, 1200);
-    } catch {
-      button.textContent = 'Gagal';
-      setTimeout(() => { button.textContent = 'Copy'; }, 1200);
-    }
-  });
+copyAllBtn.addEventListener('click', async () => {
+  if (!state.deliveredItems.length) return;
+  const text = state.deliveredItems.map((item, index) => `Item ${index + 1}\nEmail: ${item.email}\nPassword: ${item.password}`).join('\n\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    copyAllBtn.textContent = 'Copied';
+    setTimeout(() => { copyAllBtn.textContent = 'Copy all'; }, 1200);
+  } catch {
+    copyAllBtn.textContent = 'Gagal';
+    setTimeout(() => { copyAllBtn.textContent = 'Copy all'; }, 1200);
+  }
 });
 
 document.querySelectorAll('[data-close-modal]').forEach((trigger) => {
@@ -893,14 +1198,53 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-heroOpenCheckout.addEventListener('click', () => openCheckout(state.activeProduct.id));
-checkoutCloseBtn.addEventListener('click', () => closeModal('checkoutModal'));
-
-document.getElementById('closeTelegramPopup').addEventListener('click', () => {
-  document.getElementById('telegramPopup').style.display = 'none';
+checkoutCloseBtn.addEventListener('click', resetToCatalog);
+backToStoreBtn.addEventListener('click', resetToCatalog);
+expiredBackBtn.addEventListener('click', resetToCatalog);
+newOrderBtn.addEventListener('click', () => {
+  resetCheckoutState(true);
+  setStep(1);
 });
 
+closeTelegramPopup.addEventListener('click', closeTelegramCard);
+telegramLauncher.addEventListener('click', openTelegramCard);
+
+themeToggle.addEventListener('click', toggleTheme);
+
+decreaseQtyBtn.addEventListener('click', () => {
+  quantityInput.value = String(Math.max(1, Number(quantityInput.value || 1) - 1));
+  updateCheckoutSummary();
+});
+
+increaseQtyBtn.addEventListener('click', () => {
+  const max = Number(quantityInput.max || 50);
+  quantityInput.value = String(Math.min(max, Number(quantityInput.value || 1) + 1));
+  updateCheckoutSummary();
+});
+
+quantityInput.addEventListener('input', () => {
+  updateQuantityLimit();
+  updateCheckoutSummary();
+});
+
+downloadQrBtn.addEventListener('click', () => {
+  if (!state.qrisDataUrl) return;
+  const link = document.createElement('a');
+  link.href = state.qrisDataUrl;
+  link.download = `${state.orderId}-qris.svg`;
+  link.click();
+});
+
+zoomQrBtn.addEventListener('click', () => {
+  if (!state.qrisDataUrl) return;
+  openModal('qrZoomModal');
+});
+
+patchProductStocks();
+openTelegramCard();
+applyTheme(state.theme);
 renderCategories();
 renderProducts();
 selectProduct(state.activeProduct.id);
 resetCheckoutState(true);
+updateStatusProgress();
