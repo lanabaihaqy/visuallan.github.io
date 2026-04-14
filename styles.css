@@ -892,7 +892,6 @@ body.dark-theme .contact-row,
 body.dark-theme .hero-point,
 body.dark-theme .detail-section,
 body.dark-theme .detail-metrics div,
-body.dark-theme .product-meta article,
 body.dark-theme .step-chip,
 body.dark-theme .product-card,
 body.dark-theme .payment-card,
@@ -1394,16 +1393,4 @@ body.dark-theme .payment-meta small,
 body.dark-theme .checkout-price-card small,
 body.dark-theme .checkout-price-card span{
   color:var(--muted);
-}
-
-body.dark-theme .product-meta small,
-body.dark-theme .product-footer small,
-body.dark-theme .product-title-wrap small,
-body.dark-theme .product-desc{
-  color:var(--muted);
-}
-body.dark-theme .product-meta strong,
-body.dark-theme .product-price,
-body.dark-theme .product-title-wrap h3{
-  color:var(--text);
 }
