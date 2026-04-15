@@ -502,8 +502,11 @@ const products = [
 
 const categories = ['Semua', 'AI Premium', 'Streaming & Musik', 'Lisensi Software', 'VPN', 'Kopi', 'Voucher'];
 
-const API_BASE_URL = 'https://api.visuallan.my.id';
+
+const DEFAULT_API_BASE = 'https://api.visuallan.my.id';
 const DEFAULT_TURNSTILE_SITEKEY = '0x4AAAAAAC96cg8s6jhd7q2v';
+
+window.VICHIZ_API_BASE = window.VICHIZ_API_BASE || DEFAULT_API_BASE;
 window.VICHIZ_TURNSTILE_SITEKEY = window.VICHIZ_TURNSTILE_SITEKEY || DEFAULT_TURNSTILE_SITEKEY;
 
 const state = {
@@ -511,14 +514,14 @@ const state = {
   activeProduct: products[0],
   pendingProductId: null,
   currentStep: 1,
-  orderId: 'ORD-VCHZ-000000',
-  invoiceId: 'INV-VCHZ-000000',
+  orderId: '',
+  invoiceId: '',
   countdown: 300,
   countdownInterval: null,
   paymentChecks: 0,
-  checksUntilSuccess: 3,
   checkoutExpired: false,
-  qrisDataUrl: '',
+  paymentUrl: '',
+  paymentQrUrl: '',
   deliveredItems: [],
   buyer: {
     name: '',
@@ -528,9 +531,6 @@ const state = {
   },
   turnstileWidgetId: null,
   turnstileToken: '',
-  paymentUrl: '',
-  providerReferenceId: '',
-  expiresAt: null,
   theme: localStorage.getItem('vichiz-theme') || 'light',
 };
 
@@ -558,6 +558,8 @@ const themeToggle = document.getElementById('themeToggle');
 const decreaseQtyBtn = document.getElementById('decreaseQtyBtn');
 const increaseQtyBtn = document.getElementById('increaseQtyBtn');
 const copyAllBtn = document.getElementById('copyAllBtn');
+const qrisImage = document.getElementById('qrisImage');
+const qrisImageZoom = document.getElementById('qrisImageZoom');
 
 function formatRupiah(value) {
   if (value == null) return 'By request';
@@ -565,17 +567,22 @@ function formatRupiah(value) {
     style: 'currency',
     currency: 'IDR',
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(Number(value) || 0);
 }
 
 function formatCountdown(totalSeconds) {
-  const minutes = Math.floor(Math.max(0, totalSeconds) / 60).toString().padStart(2, '0');
-  const seconds = Math.max(0, totalSeconds % 60).toString().padStart(2, '0');
+  const safe = Math.max(0, Number(totalSeconds) || 0);
+  const minutes = Math.floor(safe / 60).toString().padStart(2, '0');
+  const seconds = Math.floor(safe % 60).toString().padStart(2, '0');
   return `${minutes}:${seconds}`;
 }
 
 function slugify(text) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function notify(message) {
+  window.alert(message);
 }
 
 function openModal(id) {
@@ -595,9 +602,6 @@ function closeModal(id) {
   if (!modal) return;
   modal.classList.remove('is-open');
   modal.setAttribute('aria-hidden', 'true');
-  if (id === 'checkoutModal') {
-    state.turnstileToken = '';
-  }
   if (!document.querySelector('.modal.is-open')) {
     document.body.classList.remove('modal-open');
   }
@@ -637,7 +641,12 @@ function applyTheme(theme) {
   state.theme = theme;
   document.body.classList.toggle('dark-theme', theme === 'dark');
   localStorage.setItem('vichiz-theme', theme);
-  themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Aktifkan tema terang' : 'Aktifkan tema gelap');
+  if (themeToggle) {
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Aktifkan tema terang' : 'Aktifkan tema gelap');
+  }
+  if (document.getElementById('checkoutModal')?.classList.contains('is-open')) {
+    renderTurnstile();
+  }
 }
 
 function toggleTheme() {
@@ -778,8 +787,8 @@ function updateQuantityLimit() {
     quantityInput.value = '1';
   }
   document.getElementById('quantityHelp').textContent = state.activeProduct?.action === 'chat'
-    ? 'Jumlah bisa dipakai untuk kebutuhan awal, lalu admin akan menyesuaikan detail bulk order.'
-    : `Maksimal ${maxByStock} item per transaksi, menyesuaikan stok yang tersedia saat ini.`;
+    ? 'Jumlah ini dipakai untuk kebutuhan awal, lalu admin akan menyesuaikan detail bulk order.'
+    : `Maksimal ${maxByStock} item per transaksi, mengikuti stok yang tersedia saat ini.`;
 }
 
 function syncProductToCheckout(product) {
@@ -844,92 +853,96 @@ function handleBuy(productId) {
   openWarning(productId);
 }
 
-
-function generateOrderIds() {
-  const stamp = Date.now().toString().slice(-6);
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return {
-    orderId: `VCH-${stamp}${rand}`,
-    invoiceId: `INV-${new Date().getFullYear()}${stamp}${rand}`,
-  };
+function setSubmitting(isSubmitting, label = 'Lanjut ke pembayaran') {
+  if (!continuePaymentBtn) return;
+  continuePaymentBtn.disabled = isSubmitting;
+  continuePaymentBtn.textContent = isSubmitting ? 'Memproses...' : label;
 }
 
-function generatePaymentPlaceholder(title, subtitle) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720">
-      <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ffffff"/>
-          <stop offset="100%" stop-color="#eef4ff"/>
-        </linearGradient>
-        <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#4f7bff"/>
-          <stop offset="100%" stop-color="#5cc7d7"/>
-        </linearGradient>
-      </defs>
-      <rect width="720" height="720" rx="48" fill="url(#bg)"/>
-      <rect x="64" y="64" width="592" height="592" rx="36" fill="#fff" stroke="#d8e3ff" stroke-width="8"/>
-      <circle cx="360" cy="220" r="88" fill="url(#accent)" opacity="0.15"/>
-      <rect x="252" y="128" width="216" height="184" rx="28" fill="url(#accent)"/>
-      <path d="M316 220h88M360 176v88" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
-      <text x="360" y="412" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="42" font-weight="800" fill="#13203d">${title}</text>
-      <text x="360" y="470" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="28" fill="#5f7196">${subtitle}</text>
-      <text x="360" y="548" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="26" fill="#6f7f9e">Halaman pembayaran dibuka di tab baru via SayaBayar</text>
-    </svg>
-  `;
+function setCheckLoading(isLoading) {
+  if (!manualCheckBtn) return;
+  manualCheckBtn.disabled = isLoading || state.checkoutExpired || !state.orderId;
+  manualCheckBtn.textContent = isLoading ? 'Mengecek...' : 'Cek status';
+}
+
+function resetTurnstileWidget() {
+  if (window.turnstile && state.turnstileWidgetId != null) {
+    try {
+      window.turnstile.reset(state.turnstileWidgetId);
+    } catch (_err) {
+      // ignore reset failure
+    }
+  }
+  state.turnstileToken = '';
+}
+
+function buildPaymentRedirectCard(text) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720">
+    <rect width="720" height="720" rx="72" fill="#ffffff"/>
+    <rect x="70" y="70" width="580" height="580" rx="48" fill="#eef3ff" stroke="#d8e3ff"/>
+    <text x="360" y="240" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="40" font-weight="800" fill="#1b2440">SayaBayar</text>
+    <text x="360" y="318" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="600" fill="#4b5b85">Pembayaran dibuka di tab baru</text>
+    <text x="360" y="392" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="24" fill="#6a7aa6">${text}</text>
+    <rect x="148" y="468" width="424" height="86" rx="43" fill="#4a72f5"/>
+    <text x="360" y="522" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="800" fill="#ffffff">Lanjut bayar di SayaBayar</text>
+  </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-function setPaymentActionButtons(mode = 'redirect') {
-  if (!downloadQrBtn || !zoomQrBtn) return;
-  if (mode === 'redirect') {
-    downloadQrBtn.textContent = 'Copy link bayar';
-    zoomQrBtn.textContent = 'Buka halaman bayar';
-  } else {
-    downloadQrBtn.textContent = 'Unduh QRIS';
-    zoomQrBtn.textContent = 'Zoom QRIS';
+function updatePaymentVisual() {
+  const productLabel = state.activeProduct?.brand || 'SayaBayar';
+  const fallbackCard = buildPaymentRedirectCard(productLabel);
+  const imageSrc = state.paymentQrUrl || fallbackCard;
+  if (qrisImage) {
+    qrisImage.src = imageSrc;
+    qrisImage.alt = state.paymentQrUrl
+      ? `QR pembayaran ${productLabel}`
+      : `Pembayaran ${productLabel} dibuka di tab baru`;
+  }
+  if (qrisImageZoom) {
+    qrisImageZoom.src = imageSrc;
+    qrisImageZoom.alt = qrisImage?.alt || '';
+  }
+  if (downloadQrBtn) {
+    downloadQrBtn.textContent = state.paymentQrUrl ? 'Unduh QRIS' : 'Buka SayaBayar';
+  }
+  if (zoomQrBtn) {
+    zoomQrBtn.textContent = state.paymentQrUrl ? 'Zoom QRIS' : 'Salin link';
   }
 }
 
-function applyOrderMeta({ orderId, invoiceId, totalAmount, customerEmail }) {
-  state.orderId = orderId;
-  state.invoiceId = invoiceId;
-  document.getElementById('orderIdValue').textContent = orderId;
-  document.getElementById('successOrderId').textContent = orderId;
-  document.getElementById('detailOrderId').textContent = orderId;
-  document.getElementById('detailInvoiceId').textContent = invoiceId;
-
-  if (customerEmail) {
-    document.getElementById('successBuyerEmail').textContent = customerEmail;
+function openPaymentTab() {
+  if (!state.paymentUrl) {
+    notify('Link pembayaran belum tersedia.');
+    return;
   }
-
-  if (totalAmount != null) {
-    const formatted = formatRupiah(totalAmount);
-    document.getElementById('checkoutProductPrice').textContent = formatted;
-    document.getElementById('summaryTotal').textContent = formatted;
-    document.getElementById('amountValue').textContent = formatted;
-    document.getElementById('successAmount').textContent = formatted;
-    document.getElementById('detailOrderAmount').textContent = formatted;
-  }
+  window.open(state.paymentUrl, '_blank', 'noopener,noreferrer');
 }
 
-function buildDeliveredItemsFromBackend(accounts = []) {
-  return accounts.map((item, index) => ({
-    label: `Item ${String(index + 1).padStart(2, '0')}`,
-    email: item.account_username || item.delivered_email || '-',
-    password: item.account_password || item.delivered_password || '-',
-    note: 'Data akun muncul setelah pembayaran dikonfirmasi oleh sistem.',
-  }));
+async function copyPaymentLink() {
+  if (!state.paymentUrl) {
+    notify('Link pembayaran belum tersedia.');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(state.paymentUrl);
+    if (zoomQrBtn) {
+      zoomQrBtn.textContent = 'Tersalin';
+      setTimeout(() => { zoomQrBtn.textContent = state.paymentQrUrl ? 'Zoom QRIS' : 'Salin link'; }, 1400);
+    }
+  } catch (_err) {
+    notify('Gagal menyalin link pembayaran.');
+  }
 }
 
 function populateBuyer(formData) {
   state.buyer = {
-    name: formData.name,
-    email: formData.email,
-    phone: formData.phone,
+    name: formData.name.trim(),
+    email: formData.email.trim(),
+    phone: formData.phone.trim(),
     qty: Number(formData.qty || 1),
   };
-  document.getElementById('successBuyerEmail').textContent = formData.email;
+  document.getElementById('successBuyerEmail').textContent = state.buyer.email;
 }
 
 function renderCredentialList() {
@@ -967,7 +980,7 @@ function renderCredentialList() {
         await navigator.clipboard.writeText(`Email: ${item.email}\nPassword: ${item.password}`);
         button.textContent = 'Copied';
         setTimeout(() => { button.textContent = 'Copy data'; }, 1200);
-      } catch {
+      } catch (_err) {
         button.textContent = 'Gagal';
         setTimeout(() => { button.textContent = 'Copy data'; }, 1200);
       }
@@ -975,16 +988,17 @@ function renderCredentialList() {
   });
 }
 
-function updatePaymentStatus(text, tone = 'pending', note = 'Menunggu verifikasi pembayaran dari sistem.') {
+function updatePaymentStatus(text, tone = 'pending', note = 'Halaman pembayaran sudah dibuka di tab baru. Selesaikan pembayaran lalu cek status di sini.') {
   const badge = document.getElementById('paymentStatusText');
   badge.textContent = text;
   badge.className = `status-badge ${tone}`;
   document.getElementById('paymentStatusNote').textContent = note;
 }
 
-function updateStatusProgress(percent = 16) {
+function updateStatusProgress() {
   const progress = document.getElementById('statusBarAnimated');
-  progress.style.width = `${Math.min(100, Math.max(16, percent))}%`;
+  const base = state.currentStep === 3 ? 100 : Math.min(88, 18 + (state.paymentChecks * 14));
+  progress.style.width = `${Math.max(base, 16)}%`;
 }
 
 function clearIntervals() {
@@ -997,97 +1011,97 @@ function showPaymentLive() {
   document.getElementById('paymentExpiredCard').hidden = true;
 }
 
-function showPaymentExpired(note = 'Invoice ini sudah melewati batas waktu aktif. Silakan buat pesanan baru untuk melanjutkan pembayaran.') {
+function showPaymentExpired() {
+  if (state.checkoutExpired) return;
   state.checkoutExpired = true;
   clearIntervals();
-  updatePaymentStatus('Waktu habis', 'danger', note);
+  document.getElementById('countdownValue').textContent = '00:00';
+  updatePaymentStatus('Waktu habis', 'danger', 'Invoice ini sudah melewati batas waktu. Silakan buat pesanan baru untuk mendapatkan link pembayaran yang masih aktif.');
   document.getElementById('paymentLiveCard').hidden = true;
   document.getElementById('paymentExpiredCard').hidden = false;
   document.getElementById('expiredAmountValue').textContent = document.getElementById('amountValue').textContent;
-  document.getElementById('countdownValue').textContent = '00:00';
-  updateStatusProgress(100);
+  setCheckLoading(false);
 }
 
-function startCountdown(expiresAt = Date.now() + (5 * 60 * 1000)) {
+function startCountdown(seconds = 300) {
   clearIntervals();
-  state.expiresAt = expiresAt;
+  state.countdown = Math.max(0, Number(seconds) || 300);
   state.checkoutExpired = false;
   showPaymentLive();
-
-  const tick = () => {
-    const remainingMs = state.expiresAt - Date.now();
-    const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
-    state.countdown = remainingSeconds;
-    document.getElementById('countdownValue').textContent = formatCountdown(remainingSeconds);
-    if (remainingSeconds <= 0) {
+  document.getElementById('countdownValue').textContent = formatCountdown(state.countdown);
+  state.countdownInterval = setInterval(() => {
+    state.countdown -= 1;
+    document.getElementById('countdownValue').textContent = formatCountdown(state.countdown);
+    if (state.countdown <= 0) {
       showPaymentExpired();
     }
-  };
-
-  tick();
-  state.countdownInterval = setInterval(tick, 1000);
+  }, 1000);
 }
 
-function showSuccessState(detailData = null) {
+function normalizeDetailItems(stockAccounts = []) {
+  return stockAccounts.map((item, index) => ({
+    label: `Item ${String(index + 1).padStart(2, '0')}`,
+    email: item.account_username || item.account_email || '-',
+    password: item.account_password || '-',
+    note: 'Simpan data ini dengan aman dan gunakan sesuai ketentuan produk yang Anda beli.',
+  }));
+}
+
+function showSuccessState(detail) {
   clearIntervals();
   setStep(3);
-  updatePaymentStatus('Pembayaran berhasil', 'success', 'Pembayaran berhasil diverifikasi. Detail order sekarang bisa dilihat.');
-  updateStatusProgress(100);
-
-  if (detailData?.customer?.email) {
-    document.getElementById('successBuyerEmail').textContent = detailData.customer.email;
-  }
-
-  if (detailData?.stock_accounts?.length) {
-    state.deliveredItems = buildDeliveredItemsFromBackend(detailData.stock_accounts);
-  }
-
+  updatePaymentStatus('Pembayaran berhasil', 'success', 'Pembayaran sudah terverifikasi. Detail order sekarang tersedia di bawah.');
   document.getElementById('successOrderId').textContent = state.orderId;
   document.getElementById('detailOrderId').textContent = state.orderId;
-  document.getElementById('detailInvoiceId').textContent = state.invoiceId;
-  document.getElementById('detailOrderQty').textContent = String(state.buyer.qty || 1);
-  document.getElementById('detailOrderAmount').textContent = document.getElementById('amountValue').textContent;
+  document.getElementById('detailInvoiceId').textContent = state.invoiceId || detail.invoice_id || '-';
+  document.getElementById('detailOrderQty').textContent = String(detail.quantity || state.buyer.qty || 1);
+  document.getElementById('detailOrderAmount').textContent = formatRupiah(detail.total_amount_cents || state.activeProduct.price * (state.buyer.qty || 1));
+  document.getElementById('successAmount').textContent = formatRupiah(detail.total_amount_cents || state.activeProduct.price * (state.buyer.qty || 1));
 
+  if (detail.customer) {
+    document.getElementById('successBuyerEmail').textContent = detail.customer.email || state.buyer.email;
+  } else {
+    document.getElementById('successBuyerEmail').textContent = state.buyer.email;
+  }
+
+  state.deliveredItems = normalizeDetailItems(detail.stock_accounts || []);
   renderCredentialList();
+  orderDetailCard.hidden = false;
+  toggleOrderDetailBtn.textContent = 'Sembunyikan detail order';
+  updateStatusProgress();
 }
 
 function resetCheckoutState(resetForm = true) {
   clearIntervals();
   setStep(1);
-  state.checkoutExpired = false;
   state.paymentChecks = 0;
-  state.deliveredItems = [];
+  state.checkoutExpired = false;
+  state.orderId = '';
+  state.invoiceId = '';
   state.paymentUrl = '';
-  state.providerReferenceId = '';
-  state.qrisDataUrl = '';
-  state.expiresAt = null;
+  state.paymentQrUrl = '';
+  state.deliveredItems = [];
   state.turnstileToken = '';
-
-  const ids = generateOrderIds();
-  applyOrderMeta({
-    orderId: ids.orderId,
-    invoiceId: ids.invoiceId,
-    totalAmount: state.activeProduct.price,
-    customerEmail: state.buyer.email || '',
-  });
-
+  document.getElementById('orderIdValue').textContent = '-';
+  document.getElementById('successOrderId').textContent = '-';
+  document.getElementById('detailOrderId').textContent = '-';
+  document.getElementById('detailInvoiceId').textContent = '-';
   document.getElementById('countdownValue').textContent = '05:00';
-  updatePaymentStatus('Belum dibuat', 'pending', 'Lengkapi data pembeli dan lanjutkan ke pembayaran untuk membuat invoice baru.');
-  updateStatusProgress(16);
+  updatePaymentStatus('Menunggu pembayaran', 'pending', 'Lengkapi data pembeli, lanjutkan pembayaran, lalu buka halaman SayaBayar di tab baru.');
+  document.getElementById('statusBarAnimated').style.width = '16%';
   showPaymentLive();
   orderDetailCard.hidden = true;
   toggleOrderDetailBtn.textContent = 'Lihat detail order';
-
   if (resetForm) checkoutForm.reset();
   quantityInput.value = quantityInput.value || '1';
   updateQuantityLimit();
   updateCheckoutSummary();
-  setPaymentActionButtons('redirect');
-
-  const placeholder = generatePaymentPlaceholder('Siap dibayar', 'Invoice dibuat setelah checkout');
-  document.getElementById('qrisImage').src = placeholder;
-  document.getElementById('qrisImageZoom').src = placeholder;
+  updatePaymentVisual();
+  resetTurnstileWidget();
+  renderTurnstile();
+  setCheckLoading(false);
 }
+
 function openTelegramCard() {
   telegramPopup.style.display = 'block';
   telegramPopup.classList.add('is-open');
@@ -1102,7 +1116,6 @@ function closeTelegramCard() {
   telegramLauncher.hidden = false;
 }
 
-
 function renderTurnstilePlaceholder(message, tone = 'neutral') {
   const slot = document.getElementById('turnstileSlot');
   if (!slot) return;
@@ -1110,19 +1123,17 @@ function renderTurnstilePlaceholder(message, tone = 'neutral') {
 }
 
 function renderTurnstile() {
-  const sitekey = window.VICHIZ_TURNSTILE_SITEKEY || '';
+  const sitekey = window.VICHIZ_TURNSTILE_SITEKEY || DEFAULT_TURNSTILE_SITEKEY;
   const slot = document.getElementById('turnstileSlot');
   if (!slot) return;
 
-  state.turnstileToken = '';
-
   if (!sitekey) {
-    renderTurnstilePlaceholder('Cloudflare Turnstile belum aktif. Tambahkan sitekey agar verifikasi keamanan bisa digunakan di checkout.', 'neutral');
+    renderTurnstilePlaceholder('Masukkan sitekey Cloudflare Turnstile agar verifikasi aktif di form checkout.', 'neutral');
     return;
   }
 
   if (!window.turnstile) {
-    renderTurnstilePlaceholder('Widget Cloudflare Turnstile sedang dimuat. Tunggu sesaat, lalu coba lagi.', 'neutral');
+    renderTurnstilePlaceholder('Widget keamanan belum termuat. Pastikan script Cloudflare Turnstile sudah dipasang di index.html.', 'warning');
     return;
   }
 
@@ -1138,112 +1149,62 @@ function renderTurnstile() {
     },
     'error-callback'() {
       state.turnstileToken = '';
-      renderTurnstilePlaceholder('Verifikasi keamanan gagal dimuat. Refresh widget lalu coba lagi.', 'warning');
+      renderTurnstilePlaceholder('Verifikasi keamanan gagal dimuat. Coba tutup dan buka kembali form checkout.', 'warning');
     },
   });
 }
 
 function maybeRequireTurnstile() {
-  const sitekey = window.VICHIZ_TURNSTILE_SITEKEY || '';
+  const sitekey = window.VICHIZ_TURNSTILE_SITEKEY || DEFAULT_TURNSTILE_SITEKEY;
   if (!sitekey) return true;
   if (state.turnstileToken) return true;
   renderTurnstilePlaceholder('Selesaikan verifikasi keamanan terlebih dahulu sebelum lanjut ke pembayaran.', 'warning');
   return false;
 }
 
-async function requestJson(url, options = {}) {
-  const response = await fetch(url, options);
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = data?.detail || data?.error || data?.message || 'Request gagal';
-    throw new Error(message);
-  }
-  return data;
+function getApiBase() {
+  return (window.VICHIZ_API_BASE || DEFAULT_API_BASE).replace(/\/$/, '');
 }
 
-async function createBackendOrder(formData) {
-  return requestJson(`${API_BASE_URL}/api/orders`, {
+async function createOrderRequest(payload) {
+  const response = await fetch(`${getApiBase()}/api/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      product_id: state.activeProduct.id,
-      quantity: Number(formData.qty || 1),
-      turnstile_token: state.turnstileToken,
-      customer_name: formData.name,
-      customer_email: formData.email,
-      customer_phone: formData.phone,
-    }),
+    body: JSON.stringify(payload),
   });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.detail || data?.error || 'Gagal membuat order.');
+  }
+  return data;
 }
 
 async function fetchOrderStatus(orderId) {
-  return requestJson(`${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}/status`);
+  const response = await fetch(`${getApiBase()}/api/orders/${encodeURIComponent(orderId)}/status`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error || 'Gagal mengecek status order.');
+  }
+  return data;
 }
 
 async function fetchOrderDetail(orderId) {
-  return requestJson(`${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}/detail`);
-}
-
-function buildHostedPaymentArtifacts() {
-  state.qrisDataUrl = generatePaymentPlaceholder('Buka pembayaran', 'SayaBayar akan dibuka di tab baru');
-  document.getElementById('qrisImage').src = state.qrisDataUrl;
-  document.getElementById('qrisImageZoom').src = state.qrisDataUrl;
-  setPaymentActionButtons('redirect');
-}
-
-function prepareCheckoutFromApi(orderResponse, formData) {
-  populateBuyer(formData);
-  applyOrderMeta({
-    orderId: orderResponse.order_id,
-    invoiceId: orderResponse.invoice_id,
-    totalAmount: orderResponse.total_amount_cents,
-    customerEmail: formData.email,
-  });
-
-  state.paymentUrl = orderResponse?.payment?.payment_url || '';
-  state.providerReferenceId = orderResponse?.payment?.reference_id || '';
-  buildHostedPaymentArtifacts();
-  setStep(2);
-  startCountdown(Date.now() + (5 * 60 * 1000));
-  updatePaymentStatus(
-    'Menunggu pembayaran',
-    'pending',
-    'Halaman pembayaran SayaBayar dibuka di tab baru. Setelah selesai membayar, gunakan tombol cek status untuk memperbarui hasilnya.'
-  );
-  updateStatusProgress(34);
-
-  if (state.paymentUrl) {
-    window.open(state.paymentUrl, '_blank', 'noopener,noreferrer');
+  const response = await fetch(`${getApiBase()}/api/orders/${encodeURIComponent(orderId)}/detail`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error || 'Gagal mengambil detail order.');
   }
+  return data;
 }
 
-async function submitCheckout(formData) {
-  const originalText = continuePaymentBtn.textContent;
-  continuePaymentBtn.disabled = true;
-  continuePaymentBtn.textContent = 'Memproses...';
-  updatePaymentStatus('Membuat invoice', 'pending', 'Sistem sedang menyiapkan invoice pembayaran Anda.');
-
-  try {
-    const orderResponse = await createBackendOrder(formData);
-    prepareCheckoutFromApi(orderResponse, formData);
-    renderTurnstile();
-  } catch (error) {
-    updatePaymentStatus('Gagal membuat invoice', 'danger', error.message || 'Terjadi kendala saat menyiapkan pembayaran.');
-    alert(error.message || 'Gagal membuat invoice pembayaran.');
-  } finally {
-    continuePaymentBtn.disabled = false;
-    continuePaymentBtn.textContent = originalText;
-  }
-}
-
-async function refreshOrderStatus() {
-  if (state.currentStep !== 2 || !state.orderId || state.checkoutExpired) return;
-
-  manualCheckBtn.disabled = true;
-  const previousText = manualCheckBtn.textContent;
-  manualCheckBtn.textContent = 'Mengecek...';
+async function handleCheckStatus() {
+  if (!state.orderId || state.checkoutExpired) return;
+  setCheckLoading(true);
+  state.paymentChecks += 1;
+  updateStatusProgress();
 
   try {
     const status = await fetchOrderStatus(state.orderId);
@@ -1256,21 +1217,73 @@ async function refreshOrderStatus() {
     }
 
     if (status.payment_status === 'failed') {
-      showPaymentExpired('Invoice ini sudah tidak aktif atau dibatalkan. Buat pesanan baru untuk melanjutkan.');
+      showPaymentExpired();
       return;
     }
 
     updatePaymentStatus(
       'Menunggu konfirmasi',
       'pending',
-      `Status terakhir diperbarui pukul ${checkedAt}. Pembayaran belum terverifikasi pada invoice ini.`
+      `Status terakhir diperbarui pukul ${checkedAt}. Pembayaran belum terverifikasi, silakan selesaikan pembayaran di halaman SayaBayar lalu cek kembali.`
     );
-    updateStatusProgress(56);
   } catch (error) {
-    updatePaymentStatus('Cek status gagal', 'danger', error.message || 'Belum bisa mengambil status pembayaran saat ini.');
+    notify(error.message || 'Gagal mengecek status pembayaran.');
   } finally {
-    manualCheckBtn.disabled = false;
-    manualCheckBtn.textContent = previousText;
+    setCheckLoading(false);
+  }
+}
+
+async function handleCheckoutSubmit(formData) {
+  populateBuyer(formData);
+
+  const payload = {
+    product_id: state.activeProduct.backendProductId || state.activeProduct.id,
+    quantity: Number(formData.qty || 1),
+    turnstile_token: state.turnstileToken,
+    customer_name: state.buyer.name,
+    customer_email: state.buyer.email,
+    customer_phone: state.buyer.phone,
+  };
+
+  setSubmitting(true);
+  try {
+    const response = await createOrderRequest(payload);
+
+    state.orderId = response.order_id;
+    state.invoiceId = response.invoice_id;
+    state.paymentUrl = response.payment?.payment_url || '';
+    state.paymentQrUrl = response.payment?.qr_url || response.payment?.qr_image_url || '';
+    document.getElementById('orderIdValue').textContent = state.orderId;
+    document.getElementById('successOrderId').textContent = state.orderId;
+    document.getElementById('detailOrderId').textContent = state.orderId;
+    document.getElementById('detailInvoiceId').textContent = state.invoiceId;
+    document.getElementById('amountValue').textContent = formatRupiah(response.total_amount_cents);
+    document.getElementById('successAmount').textContent = formatRupiah(response.total_amount_cents);
+    document.getElementById('detailOrderAmount').textContent = formatRupiah(response.total_amount_cents);
+    document.getElementById('detailOrderQty').textContent = String(response.quantity || state.buyer.qty);
+
+    updatePaymentVisual();
+    setStep(2);
+    startCountdown(5 * 60);
+    updatePaymentStatus(
+      'Menunggu pembayaran',
+      'pending',
+      'Halaman pembayaran SayaBayar sudah disiapkan. Selesaikan pembayaran di tab baru, lalu kembali ke sini untuk cek status.'
+    );
+    updateStatusProgress();
+    setCheckLoading(false);
+
+    if (state.paymentUrl) {
+      openPaymentTab();
+    } else {
+      notify('Order berhasil dibuat, tetapi link pembayaran tidak ditemukan. Silakan cek konfigurasi backend SayaBayar.');
+    }
+  } catch (error) {
+    notify(error.message || 'Gagal melanjutkan ke pembayaran.');
+    resetTurnstileWidget();
+    renderTurnstile();
+  } finally {
+    setSubmitting(false);
   }
 }
 
@@ -1286,18 +1299,20 @@ checkoutForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!maybeRequireTurnstile()) return;
   const formData = Object.fromEntries(new FormData(checkoutForm));
-  await submitCheckout(formData);
+  await handleCheckoutSubmit(formData);
 });
 
-manualCheckBtn.addEventListener('click', async () => {
-  await refreshOrderStatus();
-});
+manualCheckBtn.addEventListener('click', handleCheckStatus);
 
-resetDemoBtn.addEventListener('click', () => {
-  closeModal('checkoutModal');
-  resetCheckoutState(true);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+if (resetDemoBtn) {
+  resetDemoBtn.addEventListener('click', () => {
+    if (state.paymentUrl) {
+      openPaymentTab();
+      return;
+    }
+    resetToCatalog();
+  });
+}
 
 detailBuyButton.addEventListener('click', () => handleBuy(state.activeProduct.id));
 
@@ -1321,19 +1336,27 @@ copyAllBtn.addEventListener('click', async () => {
     await navigator.clipboard.writeText(text);
     copyAllBtn.textContent = 'Copied';
     setTimeout(() => { copyAllBtn.textContent = 'Copy all'; }, 1200);
-  } catch {
+  } catch (_err) {
     copyAllBtn.textContent = 'Gagal';
     setTimeout(() => { copyAllBtn.textContent = 'Copy all'; }, 1200);
   }
 });
 
 document.querySelectorAll('[data-close-modal]').forEach((trigger) => {
-  trigger.addEventListener('click', () => closeModal(trigger.dataset.closeModal));
+  trigger.addEventListener('click', () => {
+    if (trigger.dataset.closeModal === 'checkoutModal') {
+      resetTurnstileWidget();
+    }
+    closeModal(trigger.dataset.closeModal);
+  });
 });
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     document.querySelectorAll('.modal.is-open').forEach((modal) => {
+      if (modal.id === 'checkoutModal') {
+        resetTurnstileWidget();
+      }
       closeModal(modal.id);
     });
   }
@@ -1350,12 +1373,7 @@ newOrderBtn.addEventListener('click', () => {
 closeTelegramPopup.addEventListener('click', closeTelegramCard);
 telegramLauncher.addEventListener('click', openTelegramCard);
 
-themeToggle.addEventListener('click', () => {
-  toggleTheme();
-  if (document.getElementById('checkoutModal')?.classList.contains('is-open')) {
-    renderTurnstile();
-  }
-});
+themeToggle.addEventListener('click', toggleTheme);
 
 decreaseQtyBtn.addEventListener('click', () => {
   quantityInput.value = String(Math.max(1, Number(quantityInput.value || 1) - 1));
@@ -1373,21 +1391,23 @@ quantityInput.addEventListener('input', () => {
   updateCheckoutSummary();
 });
 
-downloadQrBtn.addEventListener('click', async () => {
-  if (!state.paymentUrl) return;
-  try {
-    await navigator.clipboard.writeText(state.paymentUrl);
-    downloadQrBtn.textContent = 'Link tersalin';
-    setTimeout(() => setPaymentActionButtons('redirect'), 1200);
-  } catch {
-    downloadQrBtn.textContent = 'Gagal menyalin';
-    setTimeout(() => setPaymentActionButtons('redirect'), 1200);
+downloadQrBtn.addEventListener('click', () => {
+  if (state.paymentQrUrl) {
+    const link = document.createElement('a');
+    link.href = state.paymentQrUrl;
+    link.download = `${state.orderId}-qris`;
+    link.click();
+    return;
   }
+  openPaymentTab();
 });
 
 zoomQrBtn.addEventListener('click', () => {
-  if (!state.paymentUrl) return;
-  window.open(state.paymentUrl, '_blank', 'noopener,noreferrer');
+  if (state.paymentQrUrl) {
+    openModal('qrZoomModal');
+    return;
+  }
+  copyPaymentLink();
 });
 
 patchProductStocks();
